@@ -20,3 +20,69 @@ ul {
 
     list-style-type: none;
 }
+
+button, input {
+    border: 2px solid #FFFFFF;
+    border-radius: 5px;
+
+    padding: 5px;
+
+    background: none;
+    outline: none;
+
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+
+    transition: 300ms;
+}
+
+input::placeholder {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.7);
+
+    font-family: inherit;
+    font-size: inherit;
+}
+
+input[type="checkbox"] {
+    appearance: none;
+
+    margin: 0;
+
+    border: 0.15em solid #FFFFFF;
+    border-radius: 0.15em;
+    transform: translateY(-0.075em);
+
+    display: grid;
+
+    cursor: pointer;
+}
+input[type="checkbox"]::before {
+    content: "";
+
+    width: 0.65em;
+    height: 0.65em;
+
+    transform: scale(0);
+
+    border-radius: 2px;
+    box-shadow: inset 1em 1em #FFFFFF;
+}
+input[type="checkbox"]:checked::before {
+    transform: scale(1);
+}
+
+button {
+    cursor: pointer;
+}
+
+.hidden {
+    display: none !important;
+}
+
+h1.title {
+    text-align: center;;
+    font-size: 2rem;
+    font-family: Quicksand, sans-serif;
+}

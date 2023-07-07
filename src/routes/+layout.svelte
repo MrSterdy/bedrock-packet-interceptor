@@ -1,3 +1,28 @@
+<script lang="ts">
+	import { onMount } from "svelte";
+
+	import { logs, proxy } from "$lib/proxy/store";
+	import "$lib/css/styles.css";
+
+	onMount(() => {
+		const eventSource = new EventSource("/api/proxy");
+
+		eventSource.addEventListener("start", () =>
+			proxy!.update((old) => ({ ...old, running: true }))
+		);
+		eventSource.addEventListener("stop", () => {
+			logs.set([]);
+			proxy!.update((old) => ({ ...old, running: false }));
+		});
+		eventSource.addEventListener("packet", (event) =>
+			logs.update((packets) => [...packets, JSON.parse(event.data)])
+		);
+		eventSource.addEventListener("code", () => {
+			/** send notification */
+		});
+	});
+</script>
+
 <section class="app">
 	<section class="sidebar">
 		<div class="sidebar-header">
@@ -103,5 +128,7 @@
 		overflow-y: auto;
 
 		box-sizing: border-box;
+
+		padding: 1rem;
 	}
 </style>
