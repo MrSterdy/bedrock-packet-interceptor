@@ -1,53 +1,107 @@
-<script>
-	import Header from './Header.svelte';
-	import './styles.css';
-</script>
+<section class="app">
+	<section class="sidebar">
+		<div class="sidebar-header">
+			<a class="sidebar-url" href="/">Home</a>
+			<img class="sidebar-logo" src="/src/lib/images/logo.png" alt="" />
+		</div>
 
-<div class="app">
-	<Header />
+		<ul class="sidebar-items">
+			<li class="sidebar-item">
+				<a class="sidebar-url" href="/configuration">Configuration</a>
+				<img class="sidebar-icon" src="/src/lib/images/sidebar/gears.png" alt="" />
+				<span class="sidebar-text">Configuration</span>
+			</li>
+			<li class="sidebar-item">
+				<a class="sidebar-url" href="/">Logger</a>
+				<img class="sidebar-icon" src="/src/lib/images/sidebar/terminal.png" alt="" />
+				<span class="sidebar-text">Logger</span>
+			</li>
+			<li class="sidebar-item">
+				<a class="sidebar-url" href="/">Watcher</a>
+				<img class="sidebar-icon" src="/src/lib/images/sidebar/eye.png" alt="" />
+				<span class="sidebar-text">Watcher</span>
+			</li>
+		</ul>
+	</section>
 
 	<main>
 		<slot />
 	</main>
-
-	<footer>
-		<p>visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to learn SvelteKit</p>
-	</footer>
-</div>
+</section>
 
 <style>
 	.app {
 		display: flex;
+
+		height: 100%;
+	}
+
+	.sidebar {
+		padding-top: 1rem;
+		gap: 1.5rem;
+
+		background-color: #212121;
+
+		display: flex;
 		flex-direction: column;
-		min-height: 100vh;
+
+		font-size: 1.2rem;
+	}
+
+	.sidebar-header {
+		position: relative;
+
+		display: flex;
+		justify-content: center;
+	}
+
+	.sidebar-logo {
+		width: 10rem;
+		height: 10rem;
+	}
+
+	.sidebar-items {
+		display: flex;
+		flex-direction: column;
+	}
+
+	.sidebar-item {
+		position: relative;
+
+		display: flex;
+		align-items: center;
+
+		gap: 10px;
+
+		padding: 1rem;
+
+		transition: 300ms;
+	}
+	.sidebar-item:hover {
+		background-color: rgba(0, 0, 0, 0.2);
+	}
+
+	.sidebar-url {
+		position: absolute;
+
+		left: 0;
+
+		width: 100%;
+		height: 100%;
+
+		opacity: 0;
+	}
+
+	.sidebar-icon {
+		width: 1.5rem;
+		height: 1.5rem;
 	}
 
 	main {
-		flex: 1;
-		display: flex;
-		flex-direction: column;
-		padding: 1rem;
-		width: 100%;
-		max-width: 64rem;
-		margin: 0 auto;
+		flex-grow: 1;
+
+		overflow-y: auto;
+
 		box-sizing: border-box;
-	}
-
-	footer {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		padding: 12px;
-	}
-
-	footer a {
-		font-weight: bold;
-	}
-
-	@media (min-width: 480px) {
-		footer {
-			padding: 12px 0;
-		}
 	}
 </style>

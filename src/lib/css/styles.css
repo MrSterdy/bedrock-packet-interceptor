@@ -1,0 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand&family=Raleway&family=VT323&display=swap');
+
+html, body {
+    padding: 0;
+    margin: 0;
+
+    height: 100%;
+}
+
+body {
+    background-color: #2D2D2D;
+
+    font-family: Raleway, sans-serif;
+    color: #FFFFFF
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+
+    list-style-type: none;
+}
