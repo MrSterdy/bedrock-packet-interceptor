@@ -7,12 +7,15 @@
 	onMount(() => {
 		const eventSource = new EventSource("/api/proxy");
 
+		eventSource.addEventListener("server_proxy_status", (event) =>
+			proxy!.update((old) => ({ ...old, state: event.data === "initialized" ? "running" : "uninitialized" }))
+		)
 		eventSource.addEventListener("start", () =>
-			proxy!.update((old) => ({ ...old, running: true }))
+			proxy!.update((old) => ({ ...old, state: "running" }))
 		);
 		eventSource.addEventListener("stop", () => {
 			logs.set([]);
-			proxy!.update((old) => ({ ...old, running: false }));
+			proxy!.update((old) => ({ ...old, state: "uninitialized" }));
 		});
 		eventSource.addEventListener("packet", (event) =>
 			logs.update((packets) => [...packets, JSON.parse(event.data)])

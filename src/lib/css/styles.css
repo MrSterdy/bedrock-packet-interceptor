@@ -1,6 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Quicksand&family=Raleway&family=VT323&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Quicksand&family=Raleway&family=VT323&display=swap");
 
-html, body {
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
     padding: 0;
     margin: 0;
 
@@ -8,10 +13,10 @@ html, body {
 }
 
 body {
-    background-color: #2D2D2D;
+    background-color: #2d2d2d;
 
     font-family: Raleway, sans-serif;
-    color: #FFFFFF
+    color: #ffffff;
 }
 
 ul {
@@ -21,8 +26,9 @@ ul {
     list-style-type: none;
 }
 
-button, input {
-    border: 2px solid #FFFFFF;
+button,
+input {
+    border: 2px solid #ffffff;
     border-radius: 5px;
 
     padding: 5px;
@@ -50,7 +56,7 @@ input[type="checkbox"] {
 
     margin: 0;
 
-    border: 0.15em solid #FFFFFF;
+    border: 0.15em solid #ffffff;
     border-radius: 0.15em;
     transform: translateY(-0.075em);
 
@@ -67,7 +73,7 @@ input[type="checkbox"]::before {
     transform: scale(0);
 
     border-radius: 2px;
-    box-shadow: inset 1em 1em #FFFFFF;
+    box-shadow: inset 1em 1em #ffffff;
 }
 input[type="checkbox"]:checked::before {
     transform: scale(1);
@@ -77,12 +83,20 @@ button {
     cursor: pointer;
 }
 
+button.inactive,
+input.inactive {
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+
+    pointer-events: none;
+}
+
 .hidden {
     display: none !important;
 }
 
 h1.title {
-    text-align: center;;
+    text-align: center;
     font-size: 2rem;
     font-family: Quicksand, sans-serif;
 }
