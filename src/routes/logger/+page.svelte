@@ -14,6 +14,10 @@
 
         watchedPackets.update((packets) => [...packets, packet]);
     }
+
+    function clearPackets() {
+        $allowedLogs = [];
+    }
 </script>
 
 <svelte:head>
@@ -22,6 +26,11 @@
 
 <section id="logger">
     <h1 class="title">Logger</h1>
+
+    <button
+        type="button"
+        class="clear {$allowedLogs.length === 0 ? 'inactive' : ''}"
+        on:click={clearPackets}>CLEAR</button>
 
     <ul class="terminal">
         {#each $allowedLogs as packet, i}
@@ -43,7 +52,8 @@
                                 data-packet-name={packet.name}
                                 class="watch-packet"
                                 type="button"
-                                on:click={watchPacket}>[+]</button>
+                                on:click={watchPacket}>[+]</button
+                            >
                         {/if}
                     </span>
 
@@ -71,5 +81,7 @@
         flex-direction: column;
 
         height: 100%;
+
+        gap: 1rem;
     }
 </style>
