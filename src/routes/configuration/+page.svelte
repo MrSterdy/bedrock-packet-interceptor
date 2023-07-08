@@ -208,22 +208,34 @@
         return api.setAllowedPackets($allowedPackets);
     }
 
-    function updateAllowedPackets(event) {
-        const packet = event.target.name;
+    function updateAllowedPackets(input) {
+        const packet = input.name;
 
-        if (event.target.checked) {
+        if (input.checked) {
             allowedPackets.update((packets) => [...packets, packet]);
         } else {
+            const watchedInput = input.nextElementSibling;
+            if (watchedInput.checked) {
+                watchedInput.checked = false;
+                updateWatchedPackets(watchedInput);
+            }
+
             allowedPackets.update((packets) => packets.filter((p) => p !== packet));
         }
 
         return setAllowedPackets();
     }
 
-    function updateWatchedPackets(event) {
-        const packet = event.target.name;
+    function updateWatchedPackets(input) {
+        const packet = input.name;
 
-        if (event.target.checked) {
+        if (input.checked) {
+            const allowedInput = input.previousElementSibling;
+            if (!allowedInput.checked) {
+                allowedInput.checked = true;
+                updateAllowedPackets(allowedInput);
+            }
+
             watchedPackets.update((packets) => [...packets, packet]);
         } else {
             watchedPackets.update((packets) => packets.filter((p) => p !== packet));
@@ -314,13 +326,13 @@
                                     type="checkbox"
                                     name={packet}
                                     checked
-                                    on:change={updateAllowedPackets}
+                                    on:change={(e) => updateAllowedPackets(e.target)}
                                 />
                             {:else}
                                 <input
                                     type="checkbox"
                                     name={packet}
-                                    on:change={updateAllowedPackets}
+                                    on:change={(e) => updateAllowedPackets(e.target)}
                                 />
                             {/if}
 
@@ -330,14 +342,14 @@
                                     type="checkbox"
                                     checked
                                     name={packet}
-                                    on:change={updateWatchedPackets}
+                                    on:change={(e) => updateWatchedPackets(e.target)}
                                 />
                             {:else}
                                 <input
                                     class="watch-checkbox"
                                     type="checkbox"
                                     name={packet}
-                                    on:click={updateWatchedPackets}
+                                    on:click={(e) => updateWatchedPackets(e.target)}
                                 />
                             {/if}
 
