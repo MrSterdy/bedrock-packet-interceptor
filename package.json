@@ -32,7 +32,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@zerodevx/svelte-json-view": "^1.0.7",
 		"axios": "^1.4.0",
-		"bedrock-protocol": "^3.29.1"
+		"bedrock-protocol": "^3.29.1",
+		"svelte-json-tree": "^2.1.0"
 	}
 }

@@ -100,3 +100,25 @@ h1.title {
     font-size: 2rem;
     font-family: Quicksand, sans-serif;
 }
+
+.json {
+    --json-tree-font-size: 1.2rem;
+    --json-tree-font-family: VT323;
+    --json-tree-property-color: rgba(255, 255, 255, 0.5);
+}
+
+.json > ul {
+    cursor: initial !important;
+}
+
+.json .root {
+    cursor: pointer !important;
+}
+
+.json .container {
+    cursor: pointer !important;
+}
+
+.json .indent {
+    padding-left: 0 !important;
+}

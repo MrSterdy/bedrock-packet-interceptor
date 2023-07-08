@@ -60,8 +60,8 @@ export async function POST(reqEvent: RequestEvent) {
         case "stop":
             proxy.stop();
             break;
-        case "set_ignored_packets":
-            proxy.setIgnoredPackets(message.payload);
+        case "set_allowed_packets":
+            proxy.setAllowedPackets(message.payload);
     }
 
     return json({ success: true });

@@ -1,137 +1,151 @@
 <script lang="ts">
-	import { onMount } from "svelte";
+    import { onMount } from "svelte";
 
-	import { logs, proxy } from "$lib/proxy/store";
-	import "$lib/css/styles.css";
+    import { logs, proxy } from "$lib/proxy/store";
+    import "$lib/css/styles.css";
+    import type { ServerPayload } from "$lib/proxy/types";
 
-	onMount(() => {
-		const eventSource = new EventSource("/api/proxy");
+    onMount(() => {
+        const eventSource = new EventSource("/api/proxy");
 
-		eventSource.addEventListener("server_proxy_status", (event) =>
-			proxy!.update((old) => ({ ...old, state: event.data === "initialized" ? "running" : "uninitialized" }))
-		)
-		eventSource.addEventListener("start", () =>
-			proxy!.update((old) => ({ ...old, state: "running" }))
-		);
-		eventSource.addEventListener("stop", () => {
-			logs.set([]);
-			proxy!.update((old) => ({ ...old, state: "uninitialized" }));
-		});
-		eventSource.addEventListener("packet", (event) =>
-			logs.update((packets) => [...packets, JSON.parse(event.data)])
-		);
-		eventSource.addEventListener("code", () => {
-			/** send notification */
-		});
-	});
+        eventSource.addEventListener("server_proxy_status", (event) =>
+            proxy!.update((old) => ({
+                ...old,
+                state: event.data === "initialized" ? "running" : "uninitialized"
+            }))
+        );
+        eventSource.addEventListener("start", () =>
+            proxy!.update((old) => ({ ...old, state: "running" }))
+        );
+        eventSource.addEventListener("stop", () => {
+            logs.set([]);
+            proxy!.update((old) => ({ ...old, state: "uninitialized" }));
+        });
+        eventSource.addEventListener("packet", (event) =>
+            logs.update((packets) => [...packets, JSON.parse(event.data)])
+        );
+        eventSource.addEventListener("code", (event) => {
+            const codePayload: ServerPayload<"code"> = JSON.parse(event.data);
+
+            logs.update((packets) => [
+                ...packets,
+                {
+                    name: "msa_code",
+                    params: codePayload,
+                    boundary: "clientbound",
+                    timestamp: Date.now()
+                }
+            ]);
+        });
+    });
 </script>
 
 <section class="app">
-	<section class="sidebar">
-		<div class="sidebar-header">
-			<a class="sidebar-url" href="/">Home</a>
-			<img class="sidebar-logo" src="/src/lib/images/logo.png" alt="" />
-		</div>
+    <section class="sidebar">
+        <div class="sidebar-header">
+            <a class="sidebar-url" href="/">Home</a>
+            <img class="sidebar-logo" src="/src/lib/images/logo.png" alt="" />
+        </div>
 
-		<ul class="sidebar-items">
-			<li class="sidebar-item">
-				<a class="sidebar-url" href="/configuration">Configuration</a>
-				<img class="sidebar-icon" src="/src/lib/images/sidebar/gears.png" alt="" />
-				<span class="sidebar-text">Configuration</span>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-url" href="/">Logger</a>
-				<img class="sidebar-icon" src="/src/lib/images/sidebar/terminal.png" alt="" />
-				<span class="sidebar-text">Logger</span>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-url" href="/">Watcher</a>
-				<img class="sidebar-icon" src="/src/lib/images/sidebar/eye.png" alt="" />
-				<span class="sidebar-text">Watcher</span>
-			</li>
-		</ul>
-	</section>
+        <ul class="sidebar-items">
+            <li class="sidebar-item">
+                <a class="sidebar-url" href="/configuration">Configuration</a>
+                <img class="sidebar-icon" src="/src/lib/images/sidebar/gears.png" alt="" />
+                <span class="sidebar-text">Configuration</span>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-url" href="/logger">Logger</a>
+                <img class="sidebar-icon" src="/src/lib/images/sidebar/terminal.png" alt="" />
+                <span class="sidebar-text">Logger</span>
+            </li>
+            <li class="sidebar-item">
+                <a class="sidebar-url" href="/">Watcher</a>
+                <img class="sidebar-icon" src="/src/lib/images/sidebar/eye.png" alt="" />
+                <span class="sidebar-text">Watcher</span>
+            </li>
+        </ul>
+    </section>
 
-	<main>
-		<slot />
-	</main>
+    <main>
+        <slot />
+    </main>
 </section>
 
 <style>
-	.app {
-		display: flex;
+    .app {
+        display: flex;
 
-		height: 100%;
-	}
+        height: 100%;
+    }
 
-	.sidebar {
-		padding-top: 1rem;
-		gap: 1.5rem;
+    .sidebar {
+        padding-top: 1rem;
+        gap: 1.5rem;
 
-		background-color: #212121;
+        background-color: #212121;
 
-		display: flex;
-		flex-direction: column;
+        display: flex;
+        flex-direction: column;
 
-		font-size: 1.2rem;
-	}
+        font-size: 1.2rem;
+    }
 
-	.sidebar-header {
-		position: relative;
+    .sidebar-header {
+        position: relative;
 
-		display: flex;
-		justify-content: center;
-	}
+        display: flex;
+        justify-content: center;
+    }
 
-	.sidebar-logo {
-		width: 10rem;
-		height: 10rem;
-	}
+    .sidebar-logo {
+        width: 10rem;
+        height: 10rem;
+    }
 
-	.sidebar-items {
-		display: flex;
-		flex-direction: column;
-	}
+    .sidebar-items {
+        display: flex;
+        flex-direction: column;
+    }
 
-	.sidebar-item {
-		position: relative;
+    .sidebar-item {
+        position: relative;
 
-		display: flex;
-		align-items: center;
+        display: flex;
+        align-items: center;
 
-		gap: 10px;
+        gap: 10px;
 
-		padding: 1rem;
+        padding: 1rem;
 
-		transition: 300ms;
-	}
-	.sidebar-item:hover {
-		background-color: rgba(0, 0, 0, 0.2);
-	}
+        transition: 300ms;
+    }
+    .sidebar-item:hover {
+        background-color: rgba(0, 0, 0, 0.2);
+    }
 
-	.sidebar-url {
-		position: absolute;
+    .sidebar-url {
+        position: absolute;
 
-		left: 0;
+        left: 0;
 
-		width: 100%;
-		height: 100%;
+        width: 100%;
+        height: 100%;
 
-		opacity: 0;
-	}
+        opacity: 0;
+    }
 
-	.sidebar-icon {
-		width: 1.5rem;
-		height: 1.5rem;
-	}
+    .sidebar-icon {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
 
-	main {
-		flex-grow: 1;
+    main {
+        flex-grow: 1;
 
-		overflow-y: auto;
+        overflow-y: auto;
 
-		box-sizing: border-box;
+        box-sizing: border-box;
 
-		padding: 1rem;
-	}
+        padding: 1rem;
+    }
 </style>

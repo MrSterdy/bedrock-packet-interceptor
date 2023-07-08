@@ -2,7 +2,7 @@ import { EventEmitter } from "events";
 
 import { Relay } from "bedrock-protocol";
 
-import type { Payload, ServerEvent, ServerPayloadEvent } from "$lib/proxy/types";
+import type { ServerPayload, ServerEvent, ServerPayloadEvent } from "$lib/proxy/types";
 
 class ProxyEmitter extends EventEmitter {
     emit(event: ServerEvent | "all", payload?: object): boolean {
@@ -21,10 +21,10 @@ export function subscribe<TEvent extends ServerEvent | "all", TPayloadEvent exte
     listener: TEvent extends "all"
         ? (payload: {
               eventName: TPayloadEvent;
-              args: TPayloadEvent extends ServerPayloadEvent ? Payload<TPayloadEvent> : never;
+              args: TPayloadEvent extends ServerPayloadEvent ? ServerPayload<TPayloadEvent> : never;
           }) => void
         : TEvent extends ServerPayloadEvent
-        ? (payload: Payload<TEvent>) => void
+        ? (payload: ServerPayload<TEvent>) => void
         : () => void
 ) {
     emitter.on(event, listener);
@@ -35,10 +35,10 @@ export function unsubscribe<TEvent extends ServerEvent | "all", TPayloadEvent ex
     listener: TEvent extends "all"
         ? (payload: {
               eventName: TPayloadEvent;
-              args: TPayloadEvent extends ServerPayloadEvent ? Payload<TPayloadEvent> : never;
+              args: TPayloadEvent extends ServerPayloadEvent ? ServerPayload<TPayloadEvent> : never;
           }) => void
         : TEvent extends ServerPayloadEvent
-        ? (payload: Payload<TEvent>) => void
+        ? (payload: ServerPayload<TEvent>) => void
         : () => void
 ) {
     emitter.off(event, listener);
@@ -46,7 +46,7 @@ export function unsubscribe<TEvent extends ServerEvent | "all", TPayloadEvent ex
 
 let relay: Relay | undefined = undefined;
 
-let ignoredPackets: string[] = [];
+let allowedPackets: string[] = [];
 
 export function start(sourcePort: number, ip: string, port: number) {
     if (relay !== undefined) return;
@@ -59,7 +59,7 @@ export function start(sourcePort: number, ip: string, port: number) {
             port: port
         },
         onMsaCode: (data) => {
-            const codePayload: Payload<"code"> = {
+            const codePayload: ServerPayload<"code"> = {
                 code: data.user_code,
                 url: data.verification_uri
             };
@@ -77,18 +77,26 @@ export function start(sourcePort: number, ip: string, port: number) {
     relay.on("connect", (player) => {
         // @ts-ignore
         player.on("clientbound", (packet: Packet) => {
-            if (ignoredPackets.includes(packet.name)) return;
+            if (!allowedPackets.includes(packet.name)) return;
 
-            const packetPayload: Payload<"packet"> = { ...packet, boundary: "clientbound" };
+            const packetPayload: ServerPayload<"packet"> = {
+                ...packet,
+                boundary: "clientbound",
+                timestamp: Date.now()
+            };
 
             emitter.emit("packet", packetPayload);
         });
 
         // @ts-ignore
         player.on("serverbound", (packet: Packet) => {
-            if (ignoredPackets.includes(packet.name)) return;
+            if (!allowedPackets.includes(packet.name)) return;
 
-            const packetPayload: Payload<"packet"> = { ...packet, boundary: "serverbound" };
+            const packetPayload: ServerPayload<"packet"> = {
+                ...packet,
+                boundary: "serverbound",
+                timestamp: Date.now()
+            };
 
             emitter.emit("packet", packetPayload);
         });
@@ -105,8 +113,8 @@ export function stop() {
     emitter.emit("stop");
 }
 
-export function setIgnoredPackets(packets: string[]) {
-    ignoredPackets = packets;
+export function setAllowedPackets(packets: string[]) {
+    allowedPackets = packets;
 }
 
 export function isInitialized() {

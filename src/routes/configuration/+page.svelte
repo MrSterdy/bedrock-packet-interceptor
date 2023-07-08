@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { proxy, showPackets } from "$lib/proxy/store";
+    import { proxy, allowedPackets } from "$lib/proxy/store";
     import * as api from "$lib/proxy/api";
 
     const packets = [
@@ -202,21 +202,30 @@
         "trim_data",
         "open_sign"
     ];
+    packets.sort();
+
+    function setAllowedPackets() {
+        return api.setAllowedPackets($allowedPackets);
+    }
 
     function updatePackets(event) {
         const packet = event.target.name;
 
         if (event.target.checked) {
-            showPackets.update((packets) => [...packets, packet]);
+            allowedPackets.update((packets) => [...packets, packet]);
         } else {
-            showPackets.update((packets) => packets.filter((p) => p !== packet));
+            allowedPackets.update((packets) => packets.filter((p) => p !== packet));
         }
+
+        return setAllowedPackets();
     }
 
-    function startProxy() {
+    async function startProxy() {
         $proxy.state = "starting";
 
-        return api.start({ sourcePort: +sourcePort, ip, port: +port });
+        await setAllowedPackets();
+
+        await api.start({ sourcePort: +sourcePort, ip, port: +port });
     }
 
     function stopProxy() {
@@ -290,7 +299,7 @@
                 <ul id="packets" class="hidden">
                     {#each packets as packet}
                         <li>
-                            {#if $showPackets.includes(packet)}
+                            {#if $allowedPackets.includes(packet)}
                                 <input
                                     type="checkbox"
                                     name={packet}

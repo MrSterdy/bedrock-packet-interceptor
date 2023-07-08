@@ -17,9 +17,9 @@ export function stop() {
     return post<"stop">({ event: "stop" });
 }
 
-export function setIgnoredPackets(payload: ClientPayload<"set_ignored_packets">) {
-    return post<"set_ignored_packets">({
-        event: "set_ignored_packets",
+export function setAllowedPackets(payload: ClientPayload<"set_allowed_packets">) {
+    return post<"set_allowed_packets">({
+        event: "set_allowed_packets",
         payload
     });
 }
