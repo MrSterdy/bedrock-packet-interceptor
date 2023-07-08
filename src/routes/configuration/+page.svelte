@@ -234,6 +234,10 @@
     $: $proxy.port = +port;
 </script>
 
+<svelte:head>
+    <title>Configuration</title>
+</svelte:head>
+
 <form id="configuration">
     <h1 class="title">Configuration</h1>
 
