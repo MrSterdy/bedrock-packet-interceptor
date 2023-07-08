@@ -1,5 +1,4 @@
 <script lang="ts">
-    import { JsonView } from "@zerodevx/svelte-json-view";
     import JSONTree from "svelte-json-tree";
 
     import { logs } from "$lib/proxy/store";
