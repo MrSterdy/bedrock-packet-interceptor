@@ -204,6 +204,13 @@
     ];
     packets.sort();
 
+    let filterInput = "";
+
+    function toggleFilters() {
+        document.getElementById("packets").classList.toggle("hidden");
+        document.getElementById("filter-input").classList.toggle("hidden");
+    }
+
     function setAllowedPackets() {
         return api.setAllowedPackets($allowedPackets);
     }
@@ -306,52 +313,56 @@
                 <button
                     id="filter"
                     type="button"
-                    on:click={() => document.getElementById("packets").classList.toggle("hidden")}
+                    on:click={toggleFilters}
                     >FILTER</button
                 >
 
+                <input id="filter-input" bind:value={filterInput} class="hidden" />
+
                 <ul id="packets" class="hidden">
                     {#each packets as packet}
-                        <li>
-                            {#if $allowedPackets.includes(packet)}
-                                <input
-                                    type="checkbox"
-                                    name={packet}
-                                    checked
-                                    on:change={(e) => updateAllowedPackets(e.target)}
-                                />
-                            {:else}
-                                <input
-                                    type="checkbox"
-                                    name={packet}
-                                    on:change={(e) => updateAllowedPackets(e.target)}
-                                />
-                            {/if}
+                        {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
+                            <li>
+                                {#if $allowedPackets.includes(packet)}
+                                    <input
+                                        type="checkbox"
+                                        name={packet}
+                                        checked
+                                        on:change={(e) => updateAllowedPackets(e.target)}
+                                    />
+                                {:else}
+                                    <input
+                                        type="checkbox"
+                                        name={packet}
+                                        on:change={(e) => updateAllowedPackets(e.target)}
+                                    />
+                                {/if}
 
-                            {#if $watchedPackets.includes(packet)}
-                                <input
-                                    class="watch-checkbox"
-                                    type="checkbox"
-                                    checked
-                                    name={packet}
-                                    on:change={(e) => updateWatchedPackets(e.target)}
-                                />
-                            {:else}
-                                <input
-                                    class="watch-checkbox"
-                                    type="checkbox"
-                                    name={packet}
-                                    on:click={(e) => updateWatchedPackets(e.target)}
-                                />
-                            {/if}
+                                {#if $watchedPackets.includes(packet)}
+                                    <input
+                                        class="watch-checkbox"
+                                        type="checkbox"
+                                        checked
+                                        name={packet}
+                                        on:change={(e) => updateWatchedPackets(e.target)}
+                                    />
+                                {:else}
+                                    <input
+                                        class="watch-checkbox"
+                                        type="checkbox"
+                                        name={packet}
+                                        on:click={(e) => updateWatchedPackets(e.target)}
+                                    />
+                                {/if}
 
-                            <span
-                                >{packet
-                                    .split("_")
-                                    .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
-                                    .join("")}</span
-                            >
-                        </li>
+                                <span
+                                    >{packet
+                                        .split("_")
+                                        .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
+                                        .join("")}</span
+                                >
+                            </li>
+                        {/if}
                     {/each}
                 </ul>
             </div>
