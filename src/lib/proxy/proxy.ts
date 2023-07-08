@@ -48,7 +48,7 @@ let relay: Relay | undefined = undefined;
 
 let allowedPackets: string[] = [];
 
-export function start(sourcePort: number, ip: string, port: number) {
+export async function start(sourcePort: number, ip: string, port: number) {
     if (relay !== undefined) return;
 
     relay = new Relay({
@@ -70,7 +70,17 @@ export function start(sourcePort: number, ip: string, port: number) {
         profilesFolder: "profiles"
     });
 
-    relay.listen();
+    try {
+        await relay.listen();
+    } catch (e: any) {
+        emitter.emit("proxy_error", { stack: e.stack, message: e.message });
+
+        // @ts-ignore
+        relay.raknet.close();
+        relay = undefined;
+
+        return;
+    }
 
     emitter.emit("start");
 

@@ -59,7 +59,7 @@ export async function POST(reqEvent: RequestEvent) {
 
     switch (message.event) {
         case "start":
-            proxy.start(message.payload.sourcePort, message.payload.ip, message.payload.port);
+            await proxy.start(message.payload.sourcePort, message.payload.ip, message.payload.port);
             break;
         case "stop":
             proxy.stop();
