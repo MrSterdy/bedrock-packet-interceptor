@@ -1,9 +1,13 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { SvelteToast } from "@zerodevx/svelte-toast";
 
     import { logs, proxy } from "$lib/proxy/store";
-    import "$lib/css/styles.css";
     import type { ServerPayload } from "$lib/proxy/types";
+
+    import { sendToastDefault, sendToastSuccess } from "$lib/toasts";
+
+    import "$lib/css/styles.css";
 
     onMount(() => {
         const eventSource = new EventSource("/api/proxy");
@@ -14,12 +18,17 @@
                 state: event.data === "initialized" ? "running" : "uninitialized"
             }))
         );
-        eventSource.addEventListener("start", () =>
-            proxy!.update((old) => ({ ...old, state: "running" }))
-        );
+        eventSource.addEventListener("start", () => {
+            proxy!.update((old) => ({ ...old, state: "running" }));
+
+            sendToastSuccess("The proxy has been started");
+        });
         eventSource.addEventListener("stop", () => {
             logs.set([]);
+
             proxy!.update((old) => ({ ...old, state: "uninitialized" }));
+
+            sendToastSuccess("The proxy has been closed");
         });
         eventSource.addEventListener("packet", (event) =>
             logs.update((packets) => [...packets, JSON.parse(event.data)])
@@ -36,9 +45,13 @@
                     timestamp: Date.now()
                 }
             ]);
+
+            sendToastDefault("Received an MSA code. Please check the logger");
         });
     });
 </script>
+
+<SvelteToast />
 
 <section class="app">
     <section class="sidebar">
