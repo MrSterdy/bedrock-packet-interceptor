@@ -123,6 +123,19 @@ h1.title {
     color: rgba(255, 255, 255, 0.3);
 }
 
+.packet-title {
+    display: flex;
+    justify-content: space-between;
+}
+
+.remove-packet {
+    border: none;
+    padding: 0;
+
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.3);
+}
+
 .json {
     --json-tree-font-size: 1.2rem;
     --json-tree-font-family: VT323;
