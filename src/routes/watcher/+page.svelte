@@ -3,18 +3,37 @@
 
     import { logs, watchedPackets } from "$lib/proxy/store";
 
-    let added: string[] = [];
-    logs.subscribe(() => (added = []));
+    import type { Packet } from "$lib/proxy/types";
+
+    let packets: Packet[];
+    $: {
+        packets = [];
+
+        const checkedPackets: string[] = [];
+
+        for (const packet of $logs) {
+            if (checkedPackets.includes(`${packet.name}-${packet.boundary}`)) continue;
+
+            const index = $watchedPackets.indexOf(packet.name);
+            if (index !== -1) {
+                if (typeof packets[index] !== "undefined") {
+                    packets.splice(index, 0, packet);
+                } else {
+                    packets[index] = packet;
+                }
+
+                checkedPackets.push(`${packet.name}-${packet.boundary}`);
+            }
+        }
+    }
 </script>
 
 <section id="watcher">
     <h1 class="title">Watcher</h1>
 
     <ul class="terminal">
-        {#each $logs.filter((log) => $watchedPackets.includes(log.name)).reverse() as packet}
-            {#if !added.includes(`${packet.name}-${packet.boundary}`)}
-                {added.push(`${packet.name}-${packet.boundary}`) && ""}
-
+        {#each packets as packet}
+            {#if typeof packet !== "undefined"}
                 <li>
                     <span class="packet" data-boundary={packet.boundary}>
                         <span class="packet-prefix">
@@ -30,7 +49,7 @@
 
                     {#if Object.keys(packet.params).length !== 0}
                         <div class="json">
-                            <JSONTree value={packet.params} />
+                            <JSONTree value={packet.params} defaultExpandedLevel={Infinity} />
                         </div>
                     {/if}
                 </li>
