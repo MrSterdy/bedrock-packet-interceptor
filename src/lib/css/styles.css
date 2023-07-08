@@ -128,7 +128,7 @@ h1.title {
     justify-content: space-between;
 }
 
-.remove-packet {
+.remove-packet, .watch-packet {
     border: none;
     padding: 0;
 

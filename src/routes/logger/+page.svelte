@@ -1,12 +1,18 @@
 <script lang="ts">
     import JSONTree from "svelte-json-tree";
 
-    import { allowedLogs } from "$lib/proxy/store";
+    import { allowedLogs, watchedPackets } from "$lib/proxy/store";
 
     function removePacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
 
         $allowedLogs = $allowedLogs.filter((_, i) => i !== packetIndex);
+    }
+
+    function watchPacket(event) {
+        const packet = event.target.getAttribute("data-packet-name");
+
+        watchedPackets.update((packets) => [...packets, packet]);
     }
 </script>
 
@@ -31,6 +37,14 @@
                             .split("_")
                             .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
                             .join("")}
+
+                        {#if !$watchedPackets.includes(packet.name)}
+                            <button
+                                data-packet-name={packet.name}
+                                class="watch-packet"
+                                type="button"
+                                on:click={watchPacket}>[+]</button>
+                        {/if}
                     </span>
 
                     <button
