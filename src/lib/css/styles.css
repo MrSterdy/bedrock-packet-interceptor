@@ -101,6 +101,28 @@ h1.title {
     font-family: Quicksand, sans-serif;
 }
 
+.terminal {
+    flex-grow: 1;
+
+    padding: 1rem;
+    border-radius: 10px;
+
+    background-color: rgba(0, 0, 0, 0.2);
+
+    overflow-y: auto;
+
+    word-wrap: anywhere;
+    font-family: VT323, sans-serif;
+}
+
+.packet {
+    font-size: 1.5rem;
+}
+
+.packet-prefix {
+    color: rgba(255, 255, 255, 0.3);
+}
+
 .json {
     --json-tree-font-size: 1.2rem;
     --json-tree-font-family: VT323;

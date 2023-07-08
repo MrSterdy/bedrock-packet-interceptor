@@ -59,7 +59,7 @@
                 <span class="sidebar-text">Logger</span>
             </li>
             <li class="sidebar-item">
-                <a class="sidebar-url" href="/">Watcher</a>
+                <a class="sidebar-url" href="/watcher">Watcher</a>
                 <img class="sidebar-icon" src="/src/lib/images/sidebar/eye.png" alt="" />
                 <span class="sidebar-text">Watcher</span>
             </li>

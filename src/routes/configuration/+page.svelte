@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { proxy, allowedPackets } from "$lib/proxy/store";
+    import { proxy, allowedPackets, watchedPackets } from "$lib/proxy/store";
     import * as api from "$lib/proxy/api";
 
     const packets = [
@@ -208,7 +208,7 @@
         return api.setAllowedPackets($allowedPackets);
     }
 
-    function updatePackets(event) {
+    function updateAllowedPackets(event) {
         const packet = event.target.name;
 
         if (event.target.checked) {
@@ -218,6 +218,16 @@
         }
 
         return setAllowedPackets();
+    }
+
+    function updateWatchedPackets(event) {
+        const packet = event.target.name;
+
+        if (event.target.checked) {
+            watchedPackets.update((packets) => [...packets, packet]);
+        } else {
+            watchedPackets.update((packets) => packets.filter((p) => p !== packet));
+        }
     }
 
     async function startProxy() {
@@ -304,10 +314,31 @@
                                     type="checkbox"
                                     name={packet}
                                     checked
-                                    on:change={updatePackets}
+                                    on:change={updateAllowedPackets}
                                 />
                             {:else}
-                                <input type="checkbox" name={packet} on:change={updatePackets} />
+                                <input
+                                    type="checkbox"
+                                    name={packet}
+                                    on:change={updateAllowedPackets}
+                                />
+                            {/if}
+
+                            {#if $watchedPackets.includes(packet)}
+                                <input
+                                    class="watch-checkbox"
+                                    type="checkbox"
+                                    checked
+                                    name={packet}
+                                    on:change={updateWatchedPackets}
+                                />
+                            {:else}
+                                <input
+                                    class="watch-checkbox"
+                                    type="checkbox"
+                                    name={packet}
+                                    on:click={updateWatchedPackets}
+                                />
                             {/if}
 
                             <span
@@ -328,8 +359,7 @@
             id="start"
             type="button"
             on:click={startProxy}
-            class={$proxy.state !== "uninitialized" ? "inactive" : ""}
-            >START</button
+            class={$proxy.state !== "uninitialized" ? "inactive" : ""}>START</button
         >
         <button
             id="stop"
@@ -424,5 +454,26 @@
     #stop {
         border-color: #f44336;
         color: #f44336;
+    }
+
+    .watch-checkbox {
+        border: none;
+        border-radius: unset;
+
+        padding: 0;
+    }
+    .watch-checkbox::before {
+        all: unset;
+
+        content: "";
+
+        background-image: url(/src/lib/images/sidebar/eye.png);
+        background-size: 100% 100%;
+
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+    .watch-checkbox:checked::before {
+        background-image: url(/src/lib/images/icons/eye-crossed.png);;
     }
 </style>
