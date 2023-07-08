@@ -153,7 +153,3 @@ h1.title {
 .json .container {
     cursor: pointer !important;
 }
-
-.json .indent {
-    padding-left: 0 !important;
-}
