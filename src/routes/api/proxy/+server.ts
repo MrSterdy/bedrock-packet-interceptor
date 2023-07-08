@@ -17,7 +17,11 @@ export function GET() {
             this.listener = (event: { eventName: string; args?: object }) => {
                 controller.enqueue(
                     `event: ${event.eventName}\ndata:${
-                        event.args ? ` ${JSON.stringify(event.args)}` : ""
+                        event.args
+                            ? ` ${JSON.stringify(event.args, (_, value) =>
+                                  typeof value === "bigint" ? value.toString() : value
+                              )}`
+                            : ""
                     }\n\n`
                 );
             };
