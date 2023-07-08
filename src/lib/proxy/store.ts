@@ -21,7 +21,7 @@ export function storable<T>(data: T, name: string) {
 export const proxy = storable<Partial<Proxy>>({}, "proxy");
 
 export const watchedPackets = storable<string[]>([], "watched_packets");
+export const watchedLogs = writable<ServerPayload<"packet">[][]>([]);
 
 export const allowedPackets = storable<string[]>([], "allowed_packets");
-
-export const logs = writable<ServerPayload<"packet">[]>([]);
+export const allowedLogs = writable<ServerPayload<"packet">[]>([]);

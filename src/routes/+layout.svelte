@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
-    import { logs, proxy } from "$lib/proxy/store";
+    import { allowedLogs, watchedPackets, watchedLogs, proxy } from "$lib/proxy/store";
     import type { ServerPayload } from "$lib/proxy/types";
 
     import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
@@ -19,24 +19,37 @@
             }))
         );
         eventSource.addEventListener("start", () => {
+            allowedLogs.set([]);
+            watchedLogs.set([]);
+
             proxy!.update((old) => ({ ...old, state: "running" }));
 
             sendToastSuccess("The proxy has been started");
         });
         eventSource.addEventListener("stop", () => {
-            logs.set([]);
-
             proxy!.update((old) => ({ ...old, state: "uninitialized" }));
 
             sendToastSuccess("The proxy has been closed");
         });
-        eventSource.addEventListener("packet", (event) =>
-            logs.update((packets) => [...packets, JSON.parse(event.data)])
-        );
+        eventSource.addEventListener("packet", (event) => {
+            const packet: ServerPayload<"packet"> = JSON.parse(event.data);
+
+            allowedLogs.update((packets) => [...packets, packet]);
+
+            const watchedIndex = $watchedPackets.indexOf(packet.name);
+            if (watchedIndex === -1) return;
+
+            if (typeof $watchedLogs[watchedIndex] === "undefined") {
+                $watchedLogs[watchedIndex] =
+                    packet.boundary === "serverbound" ? [undefined!, packet] : [packet, undefined!];
+            } else {
+                $watchedLogs[watchedIndex][packet.boundary === "serverbound" ? 1 : 0] = packet;
+            }
+        });
         eventSource.addEventListener("code", (event) => {
             const codePayload: ServerPayload<"code"> = JSON.parse(event.data);
 
-            logs.update((packets) => [
+            allowedLogs.update((packets) => [
                 ...packets,
                 {
                     name: "msa_code",
@@ -51,7 +64,7 @@
         eventSource.addEventListener("proxy_error", (event) => {
             console.error(JSON.parse(event.data));
 
-            logs.set([]);
+            allowedLogs.set([]);
 
             proxy!.update((old) => ({ ...old, state: "uninitialized" }));
 

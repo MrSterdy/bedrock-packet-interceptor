@@ -1,38 +1,12 @@
 <script lang="ts">
     import JSONTree from "svelte-json-tree";
 
-    import { logs, watchedPackets } from "$lib/proxy/store";
-
-    import type { ServerPayload } from "$lib/proxy/types";
-
-    let packets: (ServerPayload<"packet"> | undefined)[][];
-    $: {
-        packets = [];
-
-        const checkedPackets: string[] = [];
-
-        for (const packet of $logs.reverse()) {
-            if (checkedPackets.includes(`${packet.name}-${packet.boundary}`)) continue;
-
-            const index = $watchedPackets.indexOf(packet.name);
-            if (index !== -1) {
-                if (typeof packets[index] !== "undefined") {
-                    packets[index][packet.boundary === "serverbound" ? 1 : 0] = packet;
-                } else {
-                    packets[index] =
-                        packet.boundary === "serverbound"
-                            ? [undefined, packet]
-                            : [packet, undefined];
-                }
-
-                checkedPackets.push(`${packet.name}-${packet.boundary}`);
-            }
-        }
-    }
+    import { watchedLogs, watchedPackets } from "$lib/proxy/store";
 
     function unwatchPacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
 
+        $watchedLogs = $watchedLogs.filter((_, i) => i !== packetIndex);
         $watchedPackets = $watchedPackets.filter((_, i) => i !== packetIndex);
     }
 </script>
@@ -41,7 +15,7 @@
     <h1 class="title">Watcher</h1>
 
     <ul class="terminal">
-        {#each packets as packetPair, pairI}
+        {#each $watchedLogs as packetPair, pairI}
             {#if typeof packetPair !== "undefined"}
                 <li>
                     {#each packetPair as packet, i}

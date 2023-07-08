@@ -1,12 +1,12 @@
 <script lang="ts">
     import JSONTree from "svelte-json-tree";
 
-    import { logs } from "$lib/proxy/store";
+    import { allowedLogs } from "$lib/proxy/store";
 
     function removePacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
 
-        $logs = $logs.filter((_, i) => i !== packetIndex);
+        $allowedLogs = $allowedLogs.filter((_, i) => i !== packetIndex);
     }
 </script>
 
@@ -18,7 +18,7 @@
     <h1 class="title">Logger</h1>
 
     <ul class="terminal">
-        {#each $logs as packet, i}
+        {#each $allowedLogs as packet, i}
             <li>
                 <div class="packet-title">
                     <span class="packet" data-boundary={packet.boundary}>
