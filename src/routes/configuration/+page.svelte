@@ -247,7 +247,7 @@
 
         await setAllowedPackets();
 
-        await api.start({ sourcePort: +sourcePort, ip, port: +port });
+        await api.start({ sourcePort: +$proxy.sourcePort, ip: $proxy.ip!, port: +$proxy.port });
     }
 
     function stopProxy() {
@@ -255,14 +255,6 @@
 
         return api.stop();
     }
-
-    let sourcePort = $proxy.sourcePort ?? "";
-    let ip = $proxy.ip ?? "";
-    let port = $proxy.port ?? "";
-
-    $: $proxy.sourcePort = +sourcePort;
-    $: $proxy.ip = ip;
-    $: $proxy.port = +port;
 </script>
 
 <svelte:head>
@@ -281,7 +273,7 @@
                 placeholder="SOURCE PORT"
                 type="tel"
                 required
-                bind:value={sourcePort}
+                bind:value={$proxy.sourcePort}
                 class={$proxy.state !== "uninitialized" ? "inactive" : ""}
             />
             <div id="destination-settings">
@@ -291,7 +283,7 @@
                     type="text"
                     required
                     pattern="(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)"
-                    bind:value={ip}
+                    bind:value={$proxy.ip}
                     class={$proxy.state !== "uninitialized" ? "inactive" : ""}
                 />
                 <input
@@ -299,7 +291,7 @@
                     placeholder="DESTINATION PORT"
                     type="tel"
                     required
-                    bind:value={port}
+                    bind:value={$proxy.port}
                     class={$proxy.state !== "uninitialized" ? "inactive" : ""}
                 />
             </div>
@@ -486,6 +478,6 @@
         height: 1.5rem;
     }
     .watch-checkbox:checked::before {
-        background-image: url(/src/lib/images/icons/eye-crossed.png);;
+        background-image: url(/src/lib/images/icons/eye-crossed.png);
     }
 </style>

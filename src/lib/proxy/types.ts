@@ -39,9 +39,9 @@ export type Packet = {
 };
 
 export type Proxy = {
-    sourcePort: number;
+    sourcePort: string;
     ip: string;
-    port: number;
+    port: string;
     state: "starting" | "running" | "closing" | "uninitialized";
 };
 
