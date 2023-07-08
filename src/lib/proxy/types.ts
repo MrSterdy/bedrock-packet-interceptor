@@ -1,5 +1,5 @@
 export type ServerSignalEvent = "start" | "stop";
-export type ServerPayloadEvent = "packet" | "code";
+export type ServerPayloadEvent = "proxy_error" | "packet" | "code";
 export type ServerEvent = ServerSignalEvent | ServerPayloadEvent;
 
 export type ServerPayload<TEvent extends ServerPayloadEvent> = TEvent extends "code"
@@ -7,6 +7,8 @@ export type ServerPayload<TEvent extends ServerPayloadEvent> = TEvent extends "c
           code: string;
           url: string;
       }
+    : TEvent extends "proxy_error"
+    ? object
     : TEvent extends "packet"
     ? Packet & { boundary: "serverbound" | "clientbound"; timestamp: number }
     : never;

@@ -5,7 +5,7 @@
     import { logs, proxy } from "$lib/proxy/store";
     import type { ServerPayload } from "$lib/proxy/types";
 
-    import { sendToastDefault, sendToastSuccess } from "$lib/toasts";
+    import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
 
     import "$lib/css/styles.css";
 
@@ -48,6 +48,16 @@
 
             sendToastDefault("Received an MSA code. Please check the logger");
         });
+        eventSource.addEventListener("proxy_error", (event) => {
+            console.error(JSON.parse(event.data));
+
+            logs.set([]);
+
+            proxy!.update((old) => ({ ...old, state: "uninitialized" }));
+
+            sendToastError();
+        });
+        eventSource.addEventListener("error", console.error);
     });
 </script>
 

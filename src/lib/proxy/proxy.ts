@@ -101,6 +101,15 @@ export function start(sourcePort: number, ip: string, port: number) {
             emitter.emit("packet", packetPayload);
         });
     });
+
+    // @ts-ignore
+    relay.on("error", (error: Error) => {
+        emitter.emit("proxy_error", { stack: error.stack, message: error.message });
+
+        // @ts-ignore
+        relay.raknet.close();
+        relay = undefined;
+    });
 }
 
 export function stop() {
