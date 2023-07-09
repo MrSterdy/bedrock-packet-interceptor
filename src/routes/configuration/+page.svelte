@@ -255,7 +255,7 @@
             id="start"
             type="button"
             on:click={startProxy}
-            class={$proxy.state !== "uninitialized" ? "inactive" : ""}>START</button
+            class={$proxy.state !== "uninitialized" || $packets === undefined ? "inactive" : ""}>START</button
         >
         <button
             id="stop"
