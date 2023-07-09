@@ -1,3 +1,4 @@
+import fs from "fs";
 import { Relay } from "bedrock-protocol";
 import type { Version } from "bedrock-protocol";
 
@@ -89,4 +90,12 @@ export function setAllowedPackets(packets: string[]) {
 
 export function isRunning() {
     return relay !== undefined;
+}
+
+export function isAuthenticated() {
+    return fs.existsSync("profiles");
+}
+
+export function logout() {
+    fs.rmSync("profiles", { recursive: true, force: true });
 }

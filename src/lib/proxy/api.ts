@@ -27,3 +27,7 @@ export function setAllowedPackets(payload: ClientPayload<"proxy_set_allowed_pack
         payload
     });
 }
+
+export function logout() {
+    return post<"proxy_logout">({ event: "proxy_logout" });
+}

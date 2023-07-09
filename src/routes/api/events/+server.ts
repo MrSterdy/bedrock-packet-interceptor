@@ -8,9 +8,11 @@ import type { ClientMessage } from "$lib/events/types";
 export function GET() {
     const stream = new ReadableStream({
         start(controller) {
-            controller.enqueue(
-                `event: proxy_state\ndata: ${proxy.isRunning() ? "running" : "uninitialized"}\n\n`
-            );
+            const proxyData = {
+                state: proxy.isRunning() ? "running" : "uninitialized",
+                isAuthenticated: proxy.isAuthenticated()
+            };
+            controller.enqueue(`event: proxy_state\ndata: ${JSON.stringify(proxyData)}\n\n`);
 
             // @ts-ignore
             this.listener = (event: { eventName: string; args?: object }) => {
@@ -70,6 +72,9 @@ export async function POST(reqEvent: RequestEvent) {
             break;
         case "proxy_set_allowed_packets":
             proxy.setAllowedPackets(message.payload);
+            break;
+        case "proxy_logout":
+            proxy.logout();
     }
 
     return json({ success: true });

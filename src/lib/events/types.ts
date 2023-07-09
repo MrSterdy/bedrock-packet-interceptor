@@ -21,12 +21,12 @@ export type ServerPayload<TEvent extends ServerPayloadEvent> = TEvent extends "c
     ? Packet & { boundary: "serverbound" | "clientbound"; timestamp: number }
     : never;
 
-export type ClientSignalEvent = "proxy_stop";
+export type ClientSignalEvent = "proxy_stop" | "proxy_logout";
 export type ClientPayloadEvent = "proxy_start" | "proxy_set_allowed_packets";
 export type ClientEvent = ClientSignalEvent | ClientPayloadEvent;
 
 export type ClientPayload<TEvent extends ClientPayloadEvent> = TEvent extends "proxy_start"
-    ? Omit<Proxy, "state">
+    ? Omit<Proxy, "state" | "isAuthenticated">
     : string[];
 
 export type ClientMessage<TEvent extends ClientEvent = ClientEvent> =

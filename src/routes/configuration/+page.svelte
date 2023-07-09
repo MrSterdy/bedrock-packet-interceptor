@@ -98,6 +98,12 @@
 
         return api.stop();
     }
+
+    function logout() {
+        $proxy.isAuthenticated = false;
+
+        return api.logout();
+    }
 </script>
 
 <svelte:head>
@@ -138,6 +144,7 @@
                     class={$proxy.state !== "uninitialized" ? "inactive" : ""}
                 />
             </div>
+
             <select
                 class={$packets === undefined || $proxy.state !== "uninitialized" ? "inactive" : ""}
                 id="version"
@@ -147,6 +154,11 @@
                     <option value={version}>{version}</option>
                 {/each}
             </select>
+
+            <button
+                type="button"
+                class={!$proxy.isAuthenticated ? "inactive" : ""}
+                on:click={logout}>LOGOUT</button>
         </section>
     </section>
 
@@ -159,7 +171,8 @@
                     class={$packets === undefined ? "inactive" : ""}
                     id="filter"
                     type="button"
-                    on:click={toggleFilters}>FILTER</button>
+                    on:click={toggleFilters}>FILTER</button
+                >
 
                 {#if $packets !== undefined}
                     <input

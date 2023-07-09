@@ -3,6 +3,7 @@ export type Proxy = {
     ip: string;
     port: string;
     version: string;
+    isAuthenticated: boolean;
     state: "starting" | "running" | "closing" | "uninitialized";
 };
 

@@ -1,8 +1,8 @@
 <script lang="ts">
-    import logo from "$lib/images/logo.png"
-    import gears from "$lib/images/sidebar/gears.png"
-    import terminal from "$lib/images/sidebar/terminal.png"
-    import eye from "$lib/images/sidebar/eye.png"
+    import logo from "$lib/images/logo.png";
+    import gears from "$lib/images/sidebar/gears.png";
+    import terminal from "$lib/images/sidebar/terminal.png";
+    import eye from "$lib/images/sidebar/eye.png";
 
     import { onMount } from "svelte";
     import { SvelteToast } from "@zerodevx/svelte-toast";
@@ -15,12 +15,15 @@
     onMount(() => {
         const eventSource = new EventSource("/api/events");
 
-        eventSource.addEventListener("proxy_state", (event) =>
+        eventSource.addEventListener("proxy_state", (event) => {
+            const data = JSON.parse(event.data);
+
             proxy!.update((old) => ({
                 ...old,
-                state: event.data
-            }))
-        );
+                state: data.state,
+                isAuthenticated: data.isAuthenticated
+            }));
+        });
 
         eventSource.addEventListener("proxy_start", () => {
             allowedLogs.set([]);
