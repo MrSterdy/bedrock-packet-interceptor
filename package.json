@@ -34,7 +34,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"bedrock-protocol": "^3.29.1",
-		"sortablejs": "^1.15.0"
+		"bedrock-protocol": "^3.29.1"
 	}
 }
