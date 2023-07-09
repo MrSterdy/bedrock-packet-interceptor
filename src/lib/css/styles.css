@@ -27,7 +27,8 @@ ul {
 }
 
 button,
-input {
+input,
+select {
     border: 2px solid #ffffff;
     border-radius: 5px;
 
@@ -41,6 +42,10 @@ input {
     font-size: inherit;
 
     transition: 300ms;
+}
+
+option {
+    background-color: #212121;
 }
 
 input::placeholder {
@@ -84,7 +89,8 @@ button {
 }
 
 button.inactive,
-input.inactive {
+input.inactive,
+select.inactive {
     border-color: rgba(255, 255, 255, 0.4) !important;
     color: rgba(255, 255, 255, 0.4) !important;
 

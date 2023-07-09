@@ -1,5 +1,5 @@
 export type ServerSignalEvent = "start" | "stop";
-export type ServerPayloadEvent = "proxy_error" | "packet" | "code";
+export type ServerPayloadEvent = "proxy_error" | "download" | "packet" | "code";
 export type ServerEvent = ServerSignalEvent | ServerPayloadEvent;
 
 export type ServerPayload<TEvent extends ServerPayloadEvent> = TEvent extends "code"
@@ -9,6 +9,8 @@ export type ServerPayload<TEvent extends ServerPayloadEvent> = TEvent extends "c
       }
     : TEvent extends "proxy_error"
     ? object
+    : TEvent extends "download"
+    ? string[]
     : TEvent extends "packet"
     ? Packet & { boundary: "serverbound" | "clientbound"; timestamp: number }
     : never;
@@ -22,6 +24,7 @@ export type ClientPayload<TEvent extends ClientPayloadEvent> = TEvent extends "s
           sourcePort: number;
           ip: string;
           port: number;
+          version: string;
       }
     : string[];
 
@@ -44,10 +47,39 @@ export type Proxy = {
     sourcePort: string;
     ip: string;
     port: string;
+    version: string;
     state: "starting" | "running" | "closing" | "uninitialized";
 };
 
 declare interface ProxyEmitter {
+    on<TEvent extends ServerEvent | "all", TPayloadEvent extends ServerEvent>(
+        event: TEvent,
+        listener: TEvent extends "all"
+            ? (payload: {
+                  eventName: TPayloadEvent;
+                  args: TPayloadEvent extends ServerPayloadEvent
+                      ? ServerPayload<TPayloadEvent>
+                      : never;
+              }) => void
+            : TEvent extends ServerPayloadEvent
+            ? (payload: ServerPayload<TEvent>) => void
+            : () => void
+    ): this;
+
+    off<TEvent extends ServerEvent | "all", TPayloadEvent extends ServerEvent>(
+        event: TEvent,
+        listener: TEvent extends "all"
+            ? (payload: {
+                  eventName: TPayloadEvent;
+                  args: TPayloadEvent extends ServerPayloadEvent
+                      ? ServerPayload<TPayloadEvent>
+                      : never;
+              }) => void
+            : TEvent extends ServerPayloadEvent
+            ? (payload: ServerPayload<TEvent>) => void
+            : () => void
+    ): this;
+
     emit<TEvent extends ServerEvent>(
         event: "all",
         payload: {

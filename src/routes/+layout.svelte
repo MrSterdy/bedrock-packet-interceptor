@@ -2,7 +2,7 @@
     import { onMount } from "svelte";
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
-    import { allowedLogs, watchedPackets, watchedLogs, proxy } from "$lib/proxy/store";
+    import { allowedLogs, watchedPackets, watchedLogs, proxy, packets } from "$lib/proxy/store";
     import type { ServerPayload } from "$lib/proxy/types";
 
     import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
@@ -69,6 +69,11 @@
             proxy!.update((old) => ({ ...old, state: "uninitialized" }));
 
             sendToastError();
+        });
+        eventSource.addEventListener("download", (event) => {
+            $packets = JSON.parse(event.data);
+
+            sendToastSuccess("The packets have been downloaded");
         });
         eventSource.addEventListener("error", console.error);
     });

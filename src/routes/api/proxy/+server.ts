@@ -27,7 +27,7 @@ export function GET() {
             };
 
             // @ts-ignore
-            proxy.subscribe("all", this.listener);
+            proxy.emitter.on("all", this.listener);
 
             // @ts-ignore
             this.pingInterval = setInterval(
@@ -37,7 +37,7 @@ export function GET() {
         },
         cancel() {
             // @ts-ignore
-            proxy.unsubscribe("all", this.listener);
+            proxy.emitter.off("all", this.listener);
 
             // @ts-ignore
             clearInterval(this.pingInterval);
@@ -59,7 +59,12 @@ export async function POST(reqEvent: RequestEvent) {
 
     switch (message.event) {
         case "start":
-            await proxy.start(message.payload.sourcePort, message.payload.ip, message.payload.port);
+            await proxy.start(
+                message.payload.sourcePort,
+                message.payload.ip,
+                message.payload.port,
+                message.payload.version
+            );
             break;
         case "stop":
             proxy.stop();

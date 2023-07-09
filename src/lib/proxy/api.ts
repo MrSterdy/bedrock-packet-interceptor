@@ -1,9 +1,13 @@
-import axios from "axios";
-
 import type { ClientEvent, ClientMessage, ClientPayload } from "$lib/proxy/types";
 
 function post<TEvent extends ClientEvent>(message: ClientMessage<TEvent>) {
-    return axios.post("/api/proxy", message);
+    return fetch("/api/proxy", {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(message)
+    });
 }
 
 export function start(payload: ClientPayload<"start">) {
