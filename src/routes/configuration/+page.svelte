@@ -35,9 +35,20 @@
 
     let filterInput = "";
 
-    function toggleFilters() {
+    function toggleFiltersVisibility() {
         document.getElementById("packets").classList.toggle("hidden");
         document.getElementById("filter-input").classList.toggle("hidden");
+        document.getElementById("toggle-filters").classList.toggle("hidden");
+    }
+
+    function toggleAllFilters() {
+        if ($allowedPackets.length !== $packets!.length) {
+            $allowedPackets = $packets!;
+        } else {
+            $allowedPackets = [];
+        }
+
+        return setAllowedPackets();
     }
 
     function setAllowedPackets() {
@@ -156,7 +167,8 @@
             <button
                 type="button"
                 class={!$proxy.isAuthenticated ? "inactive" : ""}
-                on:click={logout}>LOGOUT</button>
+                on:click={logout}>LOGOUT</button
+            >
         </section>
     </section>
 
@@ -169,10 +181,16 @@
                     class={$packets === undefined ? "inactive" : ""}
                     id="filter"
                     type="button"
-                    on:click={toggleFilters}>FILTER</button
+                    on:click={toggleFiltersVisibility}>FILTERS</button
                 >
 
                 {#if $packets !== undefined}
+                    <button
+                        id="toggle-filters"
+                        type="button"
+                        class="hidden"
+                        on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button>
+
                     <input
                         id="filter-input"
                         placeholder="SEARCH..."
