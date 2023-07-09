@@ -166,9 +166,8 @@
 
             <button
                 type="button"
-                class={!$proxy.isAuthenticated ? "inactive" : ""}
-                on:click={logout}>LOGOUT</button
-            >
+                class={!$proxy.isAuthenticated || $proxy.state !== "uninitialized" ? "inactive" : ""}
+                on:click={logout}>LOGOUT</button>
         </section>
     </section>
 
