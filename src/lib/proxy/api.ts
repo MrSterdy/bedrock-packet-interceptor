@@ -1,7 +1,7 @@
-import type { ClientEvent, ClientMessage, ClientPayload } from "$lib/proxy/types";
+import type { ClientEvent, ClientMessage, ClientPayload } from "$lib/events/types";
 
 function post<TEvent extends ClientEvent>(message: ClientMessage<TEvent>) {
-    return fetch("/api/proxy", {
+    return fetch("/api/events", {
         method: "post",
         headers: {
             "Content-Type": "application/json"
@@ -10,20 +10,20 @@ function post<TEvent extends ClientEvent>(message: ClientMessage<TEvent>) {
     });
 }
 
-export function start(payload: ClientPayload<"start">) {
-    return post<"start">({
-        event: "start",
+export function start(payload: ClientPayload<"proxy_start">) {
+    return post<"proxy_start">({
+        event: "proxy_start",
         payload
     });
 }
 
 export function stop() {
-    return post<"stop">({ event: "stop" });
+    return post<"proxy_stop">({ event: "proxy_stop" });
 }
 
-export function setAllowedPackets(payload: ClientPayload<"set_allowed_packets">) {
-    return post<"set_allowed_packets">({
-        event: "set_allowed_packets",
+export function setAllowedPackets(payload: ClientPayload<"proxy_set_allowed_packets">) {
+    return post<"proxy_set_allowed_packets">({
+        event: "proxy_set_allowed_packets",
         payload
     });
 }

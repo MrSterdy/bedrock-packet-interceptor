@@ -1,7 +1,9 @@
 import { derived, writable } from "svelte/store";
 
 import { browser } from "$app/environment";
-import type { Proxy, ServerPayload } from "$lib/proxy/types";
+
+import type { Proxy } from "$lib/proxy/types";
+import type { ServerPayload } from "$lib/events/types";
 
 export function storable<T>(data: T, name: string) {
     const store = writable(data);
@@ -22,10 +24,10 @@ export const proxy = storable<Partial<Proxy>>({}, "proxy");
 export const proxyVersion = derived(proxy, ($proxy) => $proxy.version);
 
 export const watchedPackets = storable<string[]>([], "watched_packets");
-export const watchedLogs = writable<ServerPayload<"packet">[][]>([]);
+export const watchedLogs = writable<ServerPayload<"proxy_packet">[][]>([]);
 
 export const allowedPackets = storable<string[]>([], "allowed_packets");
-export const allowedLogs = writable<ServerPayload<"packet">[]>([]);
+export const allowedLogs = writable<ServerPayload<"proxy_packet">[]>([]);
 
 export const versions = writable<string[]>([]);
-export const packets = writable<string[]>([]);
+export const packets = writable<string[] | undefined>();

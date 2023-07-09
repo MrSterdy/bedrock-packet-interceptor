@@ -1,21 +1,8 @@
-import { EventEmitter } from "events";
-
 import { Relay } from "bedrock-protocol";
 import type { Version } from "bedrock-protocol";
 
-import type { ServerPayload, ServerEvent } from "$lib/proxy/types";
-
-class ProxyEmitter extends EventEmitter {
-    emit(event: ServerEvent | "all", payload?: object): boolean {
-        const result = super.emit(event, payload);
-
-        if (event !== "all") return this.emit("all", { eventName: event, args: payload });
-
-        return result;
-    }
-}
-
-export const emitter = new ProxyEmitter();
+import type { ServerPayload } from "$lib/events/types";
+import Emitter from "$lib/events/emitter";
 
 let relay: Relay | undefined = undefined;
 
@@ -33,12 +20,12 @@ export async function start(sourcePort: number, ip: string, port: number, versio
                 port: port
             },
             onMsaCode: (data) => {
-                const codePayload: ServerPayload<"code"> = {
+                const codePayload: ServerPayload<"code_received"> = {
                     code: data.user_code,
                     url: data.verification_uri
                 };
 
-                emitter.emit("code", codePayload);
+                Emitter.emit("code_received", codePayload);
             },
             version: version as Version,
             // @ts-ignore
@@ -47,69 +34,59 @@ export async function start(sourcePort: number, ip: string, port: number, versio
 
         await relay.listen();
     } catch (e: any) {
-        emitter.emit("proxy_error", { stack: e.stack, message: e.message });
-
-        // @ts-ignore
-        relay.raknet.close();
-        relay = undefined;
-
-        return;
+        return stop(e);
     }
 
-    emitter.emit("start");
+    Emitter.emit("proxy_start");
 
     relay.on("connect", (player) => {
         // @ts-ignore
         player.on("clientbound", (packet: Packet) => {
             if (!allowedPackets.includes(packet.name)) return;
 
-            const packetPayload: ServerPayload<"packet"> = {
+            const packetPayload: ServerPayload<"proxy_packet"> = {
                 ...packet,
                 boundary: "clientbound",
                 timestamp: Date.now()
             };
 
-            emitter.emit("packet", packetPayload);
+            Emitter.emit("proxy_packet", packetPayload);
         });
 
         // @ts-ignore
         player.on("serverbound", (packet: Packet) => {
             if (!allowedPackets.includes(packet.name)) return;
 
-            const packetPayload: ServerPayload<"packet"> = {
+            const packetPayload: ServerPayload<"proxy_packet"> = {
                 ...packet,
                 boundary: "serverbound",
                 timestamp: Date.now()
             };
 
-            emitter.emit("packet", packetPayload);
+            Emitter.emit("proxy_packet", packetPayload);
         });
     });
 
     // @ts-ignore
-    relay.on("error", (error: Error) => {
-        emitter.emit("proxy_error", { stack: error.stack, message: error.message });
-
-        // @ts-ignore
-        relay.raknet.close();
-        relay = undefined;
-    });
+    relay.on("error", (error: Error) => stop(error));
 }
 
-export function stop() {
-    if (relay === undefined) return;
-
+export function stop(error?: Error) {
     // @ts-ignore
-    relay.raknet.close();
+    relay?.raknet.close();
     relay = undefined;
 
-    emitter.emit("stop");
+    if (error !== undefined) {
+        Emitter.emit("server_error", { stack: error.stack, message: error.message });
+    } else {
+        Emitter.emit("proxy_stop");
+    }
 }
 
 export function setAllowedPackets(packets: string[]) {
     allowedPackets = packets;
 }
 
-export function isInitialized() {
+export function isRunning() {
     return relay !== undefined;
 }

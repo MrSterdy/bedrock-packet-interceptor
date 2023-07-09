@@ -44,6 +44,10 @@ select {
     transition: 300ms;
 }
 
+select {
+    cursor: pointer;
+}
+
 option {
     background-color: #212121;
 }
@@ -134,7 +138,7 @@ h1.title {
     justify-content: space-between;
 }
 
-.remove-packet, .watch-packet {
+.remove-packet {
     border: none;
     padding: 0;
 

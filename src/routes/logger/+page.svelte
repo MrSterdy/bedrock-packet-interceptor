@@ -50,7 +50,7 @@
                         {#if !$watchedPackets.includes(packet.name)}
                             <button
                                 data-packet-name={packet.name}
-                                class="watch-packet"
+                                class="remove-packet"
                                 type="button"
                                 on:click={watchPacket}>[+]</button
                             >

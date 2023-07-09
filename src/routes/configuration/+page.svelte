@@ -24,7 +24,7 @@
     });
 
     async function fetchPackets(version: string) {
-        $packets = [];
+        $packets = undefined;
 
         const response = await fetch(`/api/protocol/versions/${version}`).then(
             (r) => r.json() as Promise<string[] | object>
@@ -86,9 +86,9 @@
         await setAllowedPackets();
 
         await api.start({
-            sourcePort: +$proxy.sourcePort,
+            sourcePort: $proxy.sourcePort!,
             ip: $proxy.ip!,
-            port: +$proxy.port,
+            port: $proxy.port!,
             version: $proxy.version!
         });
     }
@@ -139,7 +139,7 @@
                 />
             </div>
             <select
-                class={$packets.length === 0 ? "inactive" : ""}
+                class={$packets === undefined || $proxy.state !== "uninitialized" ? "inactive" : ""}
                 id="version"
                 bind:value={$proxy.version}
             >
@@ -155,56 +155,69 @@
 
         <section>
             <div id="filter-settings">
-                <button id="filter" type="button" on:click={toggleFilters}>FILTER</button>
+                <button
+                    class={$packets === undefined ? "inactive" : ""}
+                    id="filter"
+                    type="button"
+                    on:click={toggleFilters}>FILTER</button>
 
-                <input id="filter-input" bind:value={filterInput} class="hidden" />
+                {#if $packets !== undefined}
+                    <input
+                        id="filter-input"
+                        placeholder="SEARCH..."
+                        bind:value={filterInput}
+                        class="hidden"
+                    />
 
-                <ul id="packets" class="hidden">
-                    {#each $packets as packet}
-                        {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
-                            <li>
-                                {#if $allowedPackets.includes(packet)}
-                                    <input
-                                        type="checkbox"
-                                        name={packet}
-                                        checked
-                                        on:change={(e) => updateAllowedPackets(e.target)}
-                                    />
-                                {:else}
-                                    <input
-                                        type="checkbox"
-                                        name={packet}
-                                        on:change={(e) => updateAllowedPackets(e.target)}
-                                    />
-                                {/if}
+                    <ul id="packets" class="hidden">
+                        {#each $packets ?? [] as packet}
+                            {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
+                                <li>
+                                    {#if $allowedPackets.includes(packet)}
+                                        <input
+                                            type="checkbox"
+                                            name={packet}
+                                            checked
+                                            on:change={(e) => updateAllowedPackets(e.target)}
+                                        />
+                                    {:else}
+                                        <input
+                                            type="checkbox"
+                                            name={packet}
+                                            on:change={(e) => updateAllowedPackets(e.target)}
+                                        />
+                                    {/if}
 
-                                {#if $watchedPackets.includes(packet)}
-                                    <input
-                                        class="watch-checkbox"
-                                        type="checkbox"
-                                        checked
-                                        name={packet}
-                                        on:change={(e) => updateWatchedPackets(e.target)}
-                                    />
-                                {:else}
-                                    <input
-                                        class="watch-checkbox"
-                                        type="checkbox"
-                                        name={packet}
-                                        on:click={(e) => updateWatchedPackets(e.target)}
-                                    />
-                                {/if}
+                                    {#if $watchedPackets.includes(packet)}
+                                        <input
+                                            class="watch-checkbox"
+                                            type="checkbox"
+                                            checked
+                                            name={packet}
+                                            on:change={(e) => updateWatchedPackets(e.target)}
+                                        />
+                                    {:else}
+                                        <input
+                                            class="watch-checkbox"
+                                            type="checkbox"
+                                            name={packet}
+                                            on:click={(e) => updateWatchedPackets(e.target)}
+                                        />
+                                    {/if}
 
-                                <span
-                                    >{packet
-                                        .split("_")
-                                        .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
-                                        .join("")}</span
-                                >
-                            </li>
-                        {/if}
-                    {/each}
-                </ul>
+                                    <span
+                                        >{packet
+                                            .split("_")
+                                            .map(
+                                                (word) => `${word[0].toUpperCase()}${word.slice(1)}`
+                                            )
+                                            .join("")}</span
+                                    >
+                                </li>
+                            {/if}
+                        {/each}
+                    </ul>
+                {/if}
             </div>
         </section>
     </section>

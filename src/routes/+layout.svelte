@@ -3,22 +3,21 @@
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
     import { allowedLogs, watchedPackets, watchedLogs, proxy, packets } from "$lib/proxy/store";
-    import type { ServerPayload } from "$lib/proxy/types";
-
     import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
-
+    import type { ServerPayload } from "$lib/events/types";
     import "$lib/css/styles.css";
 
     onMount(() => {
-        const eventSource = new EventSource("/api/proxy");
+        const eventSource = new EventSource("/api/events");
 
-        eventSource.addEventListener("server_proxy_status", (event) =>
+        eventSource.addEventListener("proxy_state", (event) =>
             proxy!.update((old) => ({
                 ...old,
-                state: event.data === "initialized" ? "running" : "uninitialized"
+                state: event.data
             }))
         );
-        eventSource.addEventListener("start", () => {
+
+        eventSource.addEventListener("proxy_start", () => {
             allowedLogs.set([]);
             watchedLogs.set([]);
 
@@ -26,13 +25,15 @@
 
             sendToastSuccess("The proxy has been started");
         });
-        eventSource.addEventListener("stop", () => {
+
+        eventSource.addEventListener("proxy_stop", () => {
             proxy!.update((old) => ({ ...old, state: "uninitialized" }));
 
             sendToastSuccess("The proxy has been closed");
         });
-        eventSource.addEventListener("packet", (event) => {
-            const packet: ServerPayload<"packet"> = JSON.parse(event.data);
+
+        eventSource.addEventListener("proxy_packet", (event) => {
+            const packet: ServerPayload<"proxy_packet"> = JSON.parse(event.data);
 
             allowedLogs.update((packets) => [...packets, packet]);
 
@@ -46,8 +47,9 @@
                 $watchedLogs[watchedIndex][packet.boundary === "serverbound" ? 1 : 0] = packet;
             }
         });
-        eventSource.addEventListener("code", (event) => {
-            const codePayload: ServerPayload<"code"> = JSON.parse(event.data);
+
+        eventSource.addEventListener("code_received", (event) => {
+            const codePayload: ServerPayload<"code_received"> = JSON.parse(event.data);
 
             allowedLogs.update((packets) => [
                 ...packets,
@@ -61,19 +63,23 @@
 
             sendToastDefault("Received an MSA code. Please check the logger");
         });
-        eventSource.addEventListener("proxy_error", (event) => {
+
+        eventSource.addEventListener("server_error", (event) => {
             console.error(JSON.parse(event.data));
 
             allowedLogs.set([]);
+            watchedLogs.set([]);
 
             proxy!.update((old) => ({ ...old, state: "uninitialized" }));
 
             sendToastError();
         });
-        eventSource.addEventListener("download", (event) => {
-            $packets = JSON.parse(event.data);
 
-            sendToastSuccess("The packets have been downloaded");
+        eventSource.addEventListener("protocol_downloaded", (event) => {
+            const data = JSON.parse(event.data);
+            $packets = data.packets;
+
+            sendToastSuccess(`The ${data.version} packets have been downloaded`);
         });
         eventSource.addEventListener("error", console.error);
     });

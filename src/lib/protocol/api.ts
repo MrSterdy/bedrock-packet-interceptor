@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import Emitter from "$lib/events/emitter";
 
 const dataPathsUrl =
     "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/dataPaths.json";
@@ -28,10 +29,12 @@ export async function init() {
 
 export async function downloadPackets(version: string) {
     const response = await (await fetch(protocolUrl.replace("{VERSION}", version))).json();
-    const result = Object.values(response.types.mcpe_packet[1][0].type[1].mappings);
+    const packets: string[] = Object.values(response.types.mcpe_packet[1][0].type[1].mappings);
 
-    fs.writeFileSync(`protocol/${version}.json`, JSON.stringify(result));
-    return (bedrockPackets[version] = result as string[]);
+    bedrockPackets[version] = packets;
+    fs.writeFileSync(`protocol/${version}.json`, JSON.stringify(packets));
+
+    Emitter.emit("protocol_downloaded", { version, packets });
 }
 
 export function getPackets(version: string) {

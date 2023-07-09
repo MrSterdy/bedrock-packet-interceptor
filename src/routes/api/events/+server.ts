@@ -2,15 +2,14 @@ import { json } from "@sveltejs/kit";
 import type { RequestEvent } from "@sveltejs/kit";
 
 import * as proxy from "$lib/proxy/proxy";
-import type { ClientMessage } from "$lib/proxy/types";
+import Emitter from "$lib/events/emitter";
+import type { ClientMessage } from "$lib/events/types";
 
 export function GET() {
     const stream = new ReadableStream({
         start(controller) {
             controller.enqueue(
-                `event: server_proxy_status\ndata: ${
-                    proxy.isInitialized() ? "initialized" : "uninitialized"
-                }\n\n`
+                `event: proxy_state\ndata: ${proxy.isRunning() ? "running" : "uninitialized"}\n\n`
             );
 
             // @ts-ignore
@@ -27,7 +26,7 @@ export function GET() {
             };
 
             // @ts-ignore
-            proxy.emitter.on("all", this.listener);
+            Emitter.on("all", this.listener);
 
             // @ts-ignore
             this.pingInterval = setInterval(
@@ -37,7 +36,7 @@ export function GET() {
         },
         cancel() {
             // @ts-ignore
-            proxy.emitter.off("all", this.listener);
+            Emitter.off("all", this.listener);
 
             // @ts-ignore
             clearInterval(this.pingInterval);
@@ -58,18 +57,18 @@ export async function POST(reqEvent: RequestEvent) {
     const message = (await reqEvent.request.json()) as ClientMessage;
 
     switch (message.event) {
-        case "start":
+        case "proxy_start":
             await proxy.start(
-                message.payload.sourcePort,
+                +message.payload.sourcePort,
                 message.payload.ip,
-                message.payload.port,
+                +message.payload.port,
                 message.payload.version
             );
             break;
-        case "stop":
+        case "proxy_stop":
             proxy.stop();
             break;
-        case "set_allowed_packets":
+        case "proxy_set_allowed_packets":
             proxy.setAllowedPackets(message.payload);
     }
 
