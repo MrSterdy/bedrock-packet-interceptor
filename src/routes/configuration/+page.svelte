@@ -11,10 +11,10 @@
     } from "$lib/proxy/store";
 
     import * as api from "$lib/proxy/api";
+    import { getPackets, getVersions } from "$lib/protocol/api";
 
     onMount(async () => {
-        if ($versions.length === 0)
-            $versions = await fetch("/api/protocol/versions").then((r) => r.json());
+        if ($versions.length === 0) $versions = await getVersions();
 
         if (!$proxy.version) $proxy.version = $versions[$versions.length - 1];
 
@@ -26,9 +26,7 @@
     async function fetchPackets(version: string) {
         $packets = undefined;
 
-        const response = await fetch(`/api/protocol/versions/${version}`).then(
-            (r) => r.json() as Promise<string[] | object>
-        );
+        const response = await getPackets(version);
 
         if (Array.isArray(response)) {
             $packets = response;
