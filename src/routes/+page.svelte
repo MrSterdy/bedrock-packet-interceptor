@@ -1,9 +1,13 @@
+<script>
+	import logo from "$lib/images/logo.png";
+</script>
+
 <svelte:head>
 	<title>Home</title>
 </svelte:head>
 
 <section class="home">
-	<img src="/src/lib/images/logo.png" alt="" />
+	<img src={logo} alt="" />
 	<h1 class="title">Bedrock Packet Interceptor</h1>
 
 	<h2>Welcome</h2>

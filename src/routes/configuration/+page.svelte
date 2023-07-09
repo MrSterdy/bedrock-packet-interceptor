@@ -335,13 +335,13 @@
 
         content: "";
 
-        background-image: url(/src/lib/images/sidebar/eye.png);
+        background-image: url($lib/images/sidebar/eye.png);
         background-size: 100% 100%;
 
         width: 1.5rem;
         height: 1.5rem;
     }
     .watch-checkbox:checked::before {
-        background-image: url(/src/lib/images/icons/eye-crossed.png);
+        background-image: url($lib/images/icons/eye-crossed.png);
     }
 </style>
