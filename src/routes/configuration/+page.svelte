@@ -7,7 +7,8 @@
         watchedPackets,
         versions,
         packets,
-        proxyVersion
+        proxyVersion,
+        packetLimit
     } from "$lib/proxy/store";
 
     import * as api from "$lib/proxy/api";
@@ -166,8 +167,11 @@
 
             <button
                 type="button"
-                class={!$proxy.isAuthenticated || $proxy.state !== "uninitialized" ? "inactive" : ""}
-                on:click={logout}>LOGOUT</button>
+                class={!$proxy.isAuthenticated || $proxy.state !== "uninitialized"
+                    ? "inactive"
+                    : ""}
+                on:click={logout}>LOGOUT</button
+            >
         </section>
     </section>
 
@@ -175,6 +179,15 @@
         <h2>Logger</h2>
 
         <section>
+            <input
+                type="number"
+                id="packet-limit"
+                placeholder="PACKET LIMIT"
+                min="0"
+                max="999"
+                bind:value={$packetLimit}
+                required
+            />
             <div id="filter-settings">
                 <button
                     class={$packets === undefined ? "inactive" : ""}
@@ -188,7 +201,8 @@
                         id="toggle-filters"
                         type="button"
                         class="hidden"
-                        on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button>
+                        on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button
+                    >
 
                     <input
                         id="filter-input"
@@ -255,7 +269,8 @@
             id="start"
             type="button"
             on:click={startProxy}
-            class={$proxy.state !== "uninitialized" || $packets === undefined ? "inactive" : ""}>START</button
+            class={$proxy.state !== "uninitialized" || $packets === undefined ? "inactive" : ""}
+            >START</button
         >
         <button
             id="stop"
@@ -275,15 +290,6 @@
         margin: 0 auto;
 
         max-width: 50rem;
-    }
-
-    #transport-settings {
-        display: flex;
-        flex-direction: column;
-
-        width: 100%;
-
-        gap: 10px;
     }
 
     #destination-settings {
@@ -319,6 +325,13 @@
     }
 
     .settings > :nth-child(2) {
+        display: flex;
+        flex-direction: column;
+
+        width: 100%;
+
+        gap: 10px;
+
         border-radius: 10px;
         background-color: rgba(0, 0, 0, 0.2);
         padding: 1rem;

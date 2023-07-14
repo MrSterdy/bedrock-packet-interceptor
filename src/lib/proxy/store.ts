@@ -31,3 +31,5 @@ export const allowedLogs = writable<ServerPayload<"proxy_packet">[]>([]);
 
 export const versions = writable<string[]>([]);
 export const packets = writable<string[] | undefined>();
+
+export const packetLimit = storable(100, "packet_limit");

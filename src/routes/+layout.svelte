@@ -7,7 +7,14 @@
     import { onMount } from "svelte";
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
-    import { allowedLogs, watchedPackets, watchedLogs, proxy, packets } from "$lib/proxy/store";
+    import {
+        allowedLogs,
+        watchedPackets,
+        watchedLogs,
+        proxy,
+        packets,
+        packetLimit
+    } from "$lib/proxy/store";
     import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
     import type { ServerPayload } from "$lib/events/types";
     import "$lib/css/styles.css";
@@ -43,7 +50,11 @@
         eventSource.addEventListener("proxy_packet", (event) => {
             const packet: ServerPayload<"proxy_packet"> = JSON.parse(event.data);
 
-            allowedLogs.update((packets) => [...packets, packet]);
+            const diff = $allowedLogs.length - $packetLimit + 1;
+
+            allowedLogs.update((packets) =>
+                diff > 0 ? [...packets.slice(diff), packet] : [...packets, packet]
+            );
 
             const watchedIndex = $watchedPackets.indexOf(packet.name);
             if (watchedIndex === -1) return;
