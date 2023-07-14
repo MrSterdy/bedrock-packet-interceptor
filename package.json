@@ -31,6 +31,6 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"bedrock-protocol": "^3.29.1"
+		"bedrock-protocol": "^3.30.0"
 	}
 }
