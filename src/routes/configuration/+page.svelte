@@ -1,25 +1,31 @@
 <script lang="ts">
-    import { onMount } from "svelte";
+    import { getContext, onMount } from "svelte";
 
     import {
-        proxy,
         allowedPackets,
         watchedPackets,
         versions,
         packets,
         proxyVersion,
-        packetLimit
+        packetLimit,
+        proxySourcePort,
+        proxyIp,
+        proxyPort,
+        proxyState,
+        proxyAuthenticated
     } from "$lib/proxy/store";
 
-    import * as api from "$lib/proxy/api";
     import { getPackets, getVersions } from "$lib/protocol/api";
+    import EventsApi from "$lib/events/api";
+
+    const eventsApi: EventsApi = getContext("eventsApi");
 
     onMount(async () => {
         if ($versions.length === 0) $versions = await getVersions();
 
-        if (!$proxy.version) $proxy.version = $versions[$versions.length - 1];
+        if (!$proxyVersion) $proxyVersion = $versions[$versions.length - 1];
 
-        await fetchPackets($proxy.version);
+        await fetchPackets($proxyVersion);
 
         proxyVersion.subscribe(fetchPackets);
     });
@@ -43,8 +49,8 @@
     }
 
     function toggleAllFilters() {
-        if ($allowedPackets.length !== $packets!.length) {
-            $allowedPackets = $packets!;
+        if ($allowedPackets.length !== $packets?.length) {
+            $allowedPackets = $packets ?? [];
         } else {
             $allowedPackets = [];
         }
@@ -53,7 +59,7 @@
     }
 
     function setAllowedPackets() {
-        return api.setAllowedPackets($allowedPackets);
+        return eventsApi.setAllowedPackets($allowedPackets);
     }
 
     function updateAllowedPackets(input) {
@@ -91,28 +97,28 @@
     }
 
     async function startProxy() {
-        $proxy.state = "starting";
+        $proxyState = "starting";
 
         await setAllowedPackets();
 
-        await api.start({
-            sourcePort: $proxy.sourcePort!,
-            ip: $proxy.ip!,
-            port: $proxy.port!,
-            version: $proxy.version!
+        await eventsApi.start({
+            sourcePort: $proxySourcePort,
+            ip: $proxyIp,
+            port: $proxyPort,
+            version: $proxyVersion
         });
     }
 
     function stopProxy() {
-        $proxy.state = "closing";
+        $proxyState = "closing";
 
-        return api.stop();
+        return eventsApi.stop();
     }
 
     function logout() {
-        $proxy.isAuthenticated = false;
+        $proxyAuthenticated = false;
 
-        return api.logout();
+        return eventsApi.logout();
     }
 </script>
 
@@ -130,10 +136,11 @@
             <input
                 id="source-port"
                 placeholder="SOURCE PORT"
-                type="tel"
+                type="number"
+                min="0"
                 required
-                bind:value={$proxy.sourcePort}
-                class={$proxy.state !== "uninitialized" ? "inactive" : ""}
+                bind:value={$proxySourcePort}
+                class={$proxyState !== "uninitialized" ? "inactive" : ""}
             />
             <div id="destination-settings">
                 <input
@@ -142,23 +149,24 @@
                     type="text"
                     required
                     pattern="(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)"
-                    bind:value={$proxy.ip}
-                    class={$proxy.state !== "uninitialized" ? "inactive" : ""}
+                    bind:value={$proxyIp}
+                    class={$proxyState !== "uninitialized" ? "inactive" : ""}
                 />
                 <input
                     id="dest-port"
                     placeholder="DESTINATION PORT"
-                    type="tel"
+                    type="number"
+                    min="0"
                     required
-                    bind:value={$proxy.port}
-                    class={$proxy.state !== "uninitialized" ? "inactive" : ""}
+                    bind:value={$proxyPort}
+                    class={$proxyState !== "uninitialized" ? "inactive" : ""}
                 />
             </div>
 
             <select
-                class={$packets === undefined || $proxy.state !== "uninitialized" ? "inactive" : ""}
+                class={$packets === undefined || $proxyState !== "uninitialized" ? "inactive" : ""}
                 id="version"
-                bind:value={$proxy.version}
+                bind:value={$proxyVersion}
             >
                 {#each $versions as version}
                     <option value={version}>{version}</option>
@@ -167,9 +175,7 @@
 
             <button
                 type="button"
-                class={!$proxy.isAuthenticated || $proxy.state !== "uninitialized"
-                    ? "inactive"
-                    : ""}
+                class={!$proxyAuthenticated || $proxyState !== "uninitialized" ? "inactive" : ""}
                 on:click={logout}>LOGOUT</button
             >
         </section>
@@ -269,13 +275,13 @@
             id="start"
             type="button"
             on:click={startProxy}
-            class={$proxy.state !== "uninitialized" || $packets === undefined ? "inactive" : ""}
+            class={$proxyState !== "uninitialized" || $packets === undefined ? "inactive" : ""}
             >START</button
         >
         <button
             id="stop"
             type="button"
-            class={$proxy.state !== "running" ? "inactive" : ""}
+            class={$proxyState !== "running" ? "inactive" : ""}
             on:click={stopProxy}>STOP</button
         >
     </section>

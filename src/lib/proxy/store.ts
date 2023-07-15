@@ -1,4 +1,4 @@
-import { derived, writable } from "svelte/store";
+import { writable } from "svelte/store";
 
 import { browser } from "$app/environment";
 
@@ -20,8 +20,12 @@ export function storable<T>(data: T, name: string) {
     return store;
 }
 
-export const proxy = storable<Partial<Proxy>>({}, "proxy");
-export const proxyVersion = derived(proxy, ($proxy) => $proxy.version);
+export const proxySourcePort = storable<Proxy["sourcePort"]>(0, "proxy_source_port");
+export const proxyIp = storable<Proxy["ip"]>("", "proxy_ip");
+export const proxyPort = storable<Proxy["port"]>(0, "proxy_port");
+export const proxyVersion = storable<Proxy["version"]>("", "proxy_version");
+export const proxyAuthenticated = storable<Proxy["isAuthenticated"]>(false, "proxy_authenticated");
+export const proxyState = storable<Proxy["state"]>("uninitialized", "proxy_state");
 
 export const watchedPackets = storable<string[]>([], "watched_packets");
 export const watchedLogs = writable<ServerPayload<"proxy_packet">[][]>([]);

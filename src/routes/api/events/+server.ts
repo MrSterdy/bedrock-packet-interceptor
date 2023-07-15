@@ -6,6 +6,9 @@ import Emitter from "$lib/events/emitter";
 import type { ClientMessage } from "$lib/events/types";
 
 export function GET() {
+    let listener: ((event: { eventName: string; args?: object }) => void) | undefined = undefined;
+    let pingInterval: NodeJS.Timer | undefined = undefined;
+
     const stream = new ReadableStream({
         start(controller) {
             const proxyData = {
@@ -14,8 +17,7 @@ export function GET() {
             };
             controller.enqueue(`event: proxy_state\ndata: ${JSON.stringify(proxyData)}\n\n`);
 
-            // @ts-ignore
-            this.listener = (event: { eventName: string; args?: object }) => {
+            listener = (event) =>
                 controller.enqueue(
                     `event: ${event.eventName}\ndata:${
                         event.args
@@ -25,23 +27,18 @@ export function GET() {
                             : ""
                     }\n\n`
                 );
-            };
 
-            // @ts-ignore
-            Emitter.on("all", this.listener);
+            Emitter.on("all", listener);
 
-            // @ts-ignore
-            this.pingInterval = setInterval(
+            pingInterval = setInterval(
                 () => controller.enqueue(`event: server_ping\ndata:\n\n`),
                 3000
             );
         },
         cancel() {
-            // @ts-ignore
-            Emitter.off("all", this.listener);
+            Emitter.off("all", listener as NonNullable<typeof listener>);
 
-            // @ts-ignore
-            clearInterval(this.pingInterval);
+            clearInterval(pingInterval as NonNullable<typeof pingInterval>);
         }
     });
 
@@ -56,14 +53,14 @@ export function GET() {
 }
 
 export async function POST(reqEvent: RequestEvent) {
-    const message = (await reqEvent.request.json()) as ClientMessage;
+    const message: ClientMessage = await reqEvent.request.json();
 
     switch (message.event) {
         case "proxy_start":
             await proxy.start(
-                +message.payload.sourcePort,
+                message.payload.sourcePort,
                 message.payload.ip,
-                +message.payload.port,
+                message.payload.port,
                 message.payload.version
             );
             break;

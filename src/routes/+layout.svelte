@@ -1,107 +1,21 @@
 <script lang="ts">
+    import { onMount, setContext } from "svelte";
+
     import logo from "$lib/images/logo.png";
     import gears from "$lib/images/sidebar/gears.png";
     import terminal from "$lib/images/sidebar/terminal.png";
     import eye from "$lib/images/sidebar/eye.png";
 
-    import { onMount } from "svelte";
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
-    import {
-        allowedLogs,
-        watchedPackets,
-        watchedLogs,
-        proxy,
-        packets,
-        packetLimit
-    } from "$lib/proxy/store";
-    import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
-    import type { ServerPayload } from "$lib/events/types";
+    import EventsApi from "$lib/events/api";
+
     import "$lib/css/styles.css";
 
-    onMount(() => {
-        const eventSource = new EventSource("/api/events");
+    const eventsApi = new EventsApi();
+    setContext("eventsApi", eventsApi);
 
-        eventSource.addEventListener("proxy_state", (event) => {
-            const data = JSON.parse(event.data);
-
-            proxy!.update((old) => ({
-                ...old,
-                state: data.state,
-                isAuthenticated: data.isAuthenticated
-            }));
-        });
-
-        eventSource.addEventListener("proxy_start", () => {
-            allowedLogs.set([]);
-            watchedLogs.set([]);
-
-            proxy!.update((old) => ({ ...old, state: "running" }));
-
-            sendToastSuccess("The proxy has been started");
-        });
-
-        eventSource.addEventListener("proxy_stop", () => {
-            proxy!.update((old) => ({ ...old, state: "uninitialized" }));
-
-            sendToastSuccess("The proxy has been closed");
-        });
-
-        eventSource.addEventListener("proxy_packet", (event) => {
-            const packet: ServerPayload<"proxy_packet"> = JSON.parse(event.data);
-
-            const diff = $allowedLogs.length - $packetLimit + 1;
-
-            allowedLogs.update((packets) =>
-                diff > 0 ? [...packets.slice(diff), packet] : [...packets, packet]
-            );
-
-            const watchedIndex = $watchedPackets.indexOf(packet.name);
-            if (watchedIndex === -1) return;
-
-            if (typeof $watchedLogs[watchedIndex] === "undefined") {
-                $watchedLogs[watchedIndex] =
-                    packet.boundary === "serverbound" ? [undefined!, packet] : [packet, undefined!];
-            } else {
-                $watchedLogs[watchedIndex][packet.boundary === "serverbound" ? 1 : 0] = packet;
-            }
-        });
-
-        eventSource.addEventListener("code_received", (event) => {
-            const codePayload: ServerPayload<"code_received"> = JSON.parse(event.data);
-
-            allowedLogs.update((packets) => [
-                ...packets,
-                {
-                    name: "msa_code",
-                    params: codePayload,
-                    boundary: "clientbound",
-                    timestamp: Date.now()
-                }
-            ]);
-
-            sendToastDefault("Received an MSA code. Please check the logger");
-        });
-
-        eventSource.addEventListener("server_error", (event) => {
-            console.error(JSON.parse(event.data));
-
-            allowedLogs.set([]);
-            watchedLogs.set([]);
-
-            proxy!.update((old) => ({ ...old, state: "uninitialized" }));
-
-            sendToastError();
-        });
-
-        eventSource.addEventListener("protocol_downloaded", (event) => {
-            const data = JSON.parse(event.data);
-            $packets = data.packets;
-
-            sendToastSuccess(`The ${data.version} packets have been downloaded`);
-        });
-        eventSource.addEventListener("error", console.error);
-    });
+    onMount(() => eventsApi.connect());
 </script>
 
 <SvelteToast />

@@ -1,7 +1,7 @@
 export type Proxy = {
-    sourcePort: string;
+    sourcePort: number;
     ip: string;
-    port: string;
+    port: number;
     version: string;
     isAuthenticated: boolean;
     state: "starting" | "running" | "closing" | "uninitialized";
