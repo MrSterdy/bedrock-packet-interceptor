@@ -12,7 +12,8 @@
         proxyIp,
         proxyPort,
         proxyState,
-        proxyAuthenticated
+        proxyAuthenticated,
+        proxyOffline
     } from "$lib/proxy/store";
 
     import { getPackets, getVersions } from "$lib/protocol/api";
@@ -105,7 +106,8 @@
             sourcePort: $proxySourcePort,
             ip: $proxyIp,
             port: $proxyPort,
-            version: $proxyVersion
+            version: $proxyVersion,
+            offline: $proxyOffline
         });
     }
 
@@ -178,6 +180,17 @@
                 class={!$proxyAuthenticated || $proxyState !== "uninitialized" ? "inactive" : ""}
                 on:click={logout}>LOGOUT</button
             >
+
+            <ul class="options">
+                <li>
+                    <input
+                        type="checkbox"
+                        class:inactive={$proxyState !== "uninitialized"}
+                        bind:checked={$proxyOffline}
+                    />
+                    <span>Offline</span>
+                </li>
+            </ul>
         </section>
     </section>
 
@@ -217,7 +230,7 @@
                         class="hidden"
                     />
 
-                    <ul id="packets" class="hidden">
+                    <ul id="packets" class="options hidden">
                         {#each $packets ?? [] as packet}
                             {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
                                 <li>
@@ -347,14 +360,14 @@
         width: 100%;
     }
 
-    #packets {
+    .options {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
         word-wrap: anywhere;
         gap: 10px;
     }
 
-    #packets > li {
+    .options > li {
         display: flex;
         align-items: center;
 

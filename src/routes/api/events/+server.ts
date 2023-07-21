@@ -61,7 +61,8 @@ export async function POST(reqEvent: RequestEvent) {
                 message.payload.sourcePort,
                 message.payload.ip,
                 message.payload.port,
-                message.payload.version
+                message.payload.version,
+                message.payload.offline
             );
             break;
         case "proxy_stop":

@@ -9,7 +9,13 @@ let relay: Relay | undefined = undefined;
 
 let allowedPackets: string[] = [];
 
-export async function start(sourcePort: number, ip: string, port: number, version: string) {
+export async function start(
+    sourcePort: number,
+    ip: string,
+    port: number,
+    version: string,
+    offline: boolean
+) {
     if (relay !== undefined) return;
 
     try {
@@ -18,7 +24,8 @@ export async function start(sourcePort: number, ip: string, port: number, versio
             port: sourcePort,
             destination: {
                 host: ip,
-                port: port
+                port: port,
+                offline
             },
             onMsaCode: (data) => {
                 const codePayload: ServerPayload<"code_received"> = {

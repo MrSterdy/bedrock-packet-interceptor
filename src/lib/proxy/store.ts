@@ -26,6 +26,7 @@ export const proxyPort = storable<Proxy["port"]>(0, "proxy_port");
 export const proxyVersion = storable<Proxy["version"]>("", "proxy_version");
 export const proxyAuthenticated = storable<Proxy["isAuthenticated"]>(false, "proxy_authenticated");
 export const proxyState = storable<Proxy["state"]>("uninitialized", "proxy_state");
+export const proxyOffline = storable<Proxy["offline"]>(false, "proxy_offline");
 
 export const watchedPackets = storable<string[]>([], "watched_packets");
 export const watchedLogs = writable<ServerPayload<"proxy_packet">[][]>([]);
