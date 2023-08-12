@@ -1,7 +1,7 @@
 <script lang="ts">
     import JSONTree from "svelte-json-tree";
 
-    import { allowedLogs, watchedPackets } from "$lib/proxy/store";
+    import { allowedLogs, watchedPackets } from "$lib/store";
 
     function removePacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
@@ -29,8 +29,10 @@
 
     <button
         type="button"
-        class="clear {$allowedLogs.length === 0 ? 'inactive' : ''}"
-        on:click={clearPackets}>CLEAR</button>
+        class="clear"
+        class:inactive={$allowedLogs.length === 0}
+        on:click={clearPackets}>CLEAR</button
+    >
 
     <ul class="terminal">
         {#each $allowedLogs as packet, i}

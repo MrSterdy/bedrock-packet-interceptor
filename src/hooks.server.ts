@@ -1,3 +1,3 @@
-import { init } from "$lib/protocol/packets";
+import { init } from "$lib/server/protocol";
 
 init();

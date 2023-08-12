@@ -2,8 +2,7 @@ import { writable } from "svelte/store";
 
 import { browser } from "$app/environment";
 
-import type { Proxy } from "$lib/proxy/types";
-import type { ServerPayload } from "$lib/events/types";
+import type { Proxy, ServerPayload } from "$lib/types";
 
 export function storable<T>(data: T, name: string) {
     const store = writable(data);

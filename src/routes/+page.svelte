@@ -1,16 +1,16 @@
 <script>
-	import logo from "$lib/images/logo.png";
+    import logo from "$lib/images/logo.png";
 </script>
 
 <svelte:head>
-	<title>Home</title>
+    <title>Home</title>
 </svelte:head>
 
 <section class="home">
-	<img src={logo} alt="" />
-	<h1 class="title">Bedrock Packet Interceptor</h1>
+    <img src={logo} alt="" />
+    <h1 class="title">Bedrock Packet Interceptor</h1>
 
-	<h2>Welcome</h2>
+    <h2>Welcome</h2>
 </section>
 
 <style>
@@ -22,8 +22,8 @@
         padding: 1rem;
     }
 
-		.home img {
-				width: 15rem;
-				height: 15rem;
-		}
+    .home img {
+        width: 15rem;
+        height: 15rem;
+    }
 </style>

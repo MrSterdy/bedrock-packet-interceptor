@@ -1,11 +1,6 @@
 import { EventEmitter } from "events";
 
-import type {
-    ServerEvent,
-    ServerPayload,
-    ServerPayloadEvent,
-    ServerSignalEvent
-} from "$lib/events/types";
+import type { ServerEvent, ServerPayload, ServerPayloadEvent, ServerSignalEvent } from "$lib/types";
 
 declare interface BackendEmitter {
     on<TEvent extends ServerEvent | "all", TPayloadEvent extends ServerEvent>(

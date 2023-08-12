@@ -2,8 +2,8 @@ import fs from "fs";
 import { Relay } from "bedrock-protocol";
 import type { Version } from "bedrock-protocol";
 
-import type { ServerPayload } from "$lib/events/types";
-import Emitter from "$lib/events/emitter";
+import type { ServerPayload } from "$lib/types";
+import Emitter from "$lib/server/emitter";
 
 let relay: Relay | undefined = undefined;
 

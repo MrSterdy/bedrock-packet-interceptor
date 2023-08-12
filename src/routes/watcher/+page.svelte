@@ -1,7 +1,7 @@
 <script lang="ts">
     import JSONTree from "svelte-json-tree";
 
-    import { watchedLogs, watchedPackets } from "$lib/proxy/store";
+    import { watchedLogs, watchedPackets } from "$lib/store";
 
     function unwatchPacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
@@ -42,7 +42,8 @@
                                             data-packet-index={pairI}
                                             class="remove-packet"
                                             on:click={unwatchPacket}
-                                            type="button">[X]</button>
+                                            type="button">[X]</button
+                                        >
                                     {/if}
                                 </div>
 

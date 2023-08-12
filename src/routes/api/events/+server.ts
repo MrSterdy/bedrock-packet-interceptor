@@ -1,13 +1,13 @@
 import { json } from "@sveltejs/kit";
 import type { RequestEvent } from "@sveltejs/kit";
 
-import * as proxy from "$lib/proxy/proxy";
-import Emitter from "$lib/events/emitter";
-import type { ClientMessage } from "$lib/events/types";
+import * as proxy from "$lib/server/proxy";
+import Emitter from "$lib/server/emitter";
+import type { ClientMessage } from "$lib/types";
 
 export function GET() {
-    let listener: ((event: { eventName: string; args?: object }) => void) | undefined = undefined;
-    let pingInterval: NodeJS.Timer | undefined = undefined;
+    let listener: (event: { eventName: string; args?: object }) => void;
+    let pingInterval: NodeJS.Timer;
 
     const stream = new ReadableStream({
         start(controller) {
@@ -36,9 +36,9 @@ export function GET() {
             );
         },
         cancel() {
-            Emitter.off("all", listener as NonNullable<typeof listener>);
+            Emitter.off("all", listener);
 
-            clearInterval(pingInterval as NonNullable<typeof pingInterval>);
+            clearInterval(pingInterval);
         }
     });
 

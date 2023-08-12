@@ -8,11 +8,11 @@ import {
     proxyState,
     watchedLogs,
     watchedPackets
-} from "$lib/proxy/store";
+} from "$lib/store";
 
 import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
 
-import type { ClientEvent, ClientMessage, ClientPayload, ServerPayload } from "$lib/events/types";
+import type { ClientEvent, ClientMessage, ClientPayload, ServerPayload } from "$lib/types";
 
 let eventSource: EventSource;
 

@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import Emitter from "$lib/events/emitter";
+import Emitter from "$lib/server/emitter";
 
 const dataPathsUrl =
     "https://raw.githubusercontent.com/PrismarineJS/minecraft-data/master/data/dataPaths.json";

@@ -14,11 +14,11 @@
         proxyState,
         proxyAuthenticated,
         proxyOffline
-    } from "$lib/proxy/store";
+    } from "$lib/store";
 
-    import { getPackets, getVersions } from "$lib/protocol/api";
+    import { getPackets, getVersions } from "$lib/api/protocol";
 
-    import * as eventsApi from "$lib/events/api";
+    import * as eventsApi from "$lib/api/events";
 
     onMount(async () => {
         if ($versions.length === 0) $versions = await getVersions();
@@ -141,7 +141,7 @@
                 min="0"
                 required
                 bind:value={$proxySourcePort}
-                class={$proxyState !== "uninitialized" ? "inactive" : ""}
+                class:inactive={$proxyState !== "uninitialized"}
             />
             <div id="destination-settings">
                 <input
@@ -151,7 +151,7 @@
                     required
                     pattern="(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)"
                     bind:value={$proxyIp}
-                    class={$proxyState !== "uninitialized" ? "inactive" : ""}
+                    class:inactive={$proxyState !== "uninitialized"}
                 />
                 <input
                     id="dest-port"
@@ -160,12 +160,12 @@
                     min="0"
                     required
                     bind:value={$proxyPort}
-                    class={$proxyState !== "uninitialized" ? "inactive" : ""}
+                    class:inactive={$proxyState !== "uninitialized"}
                 />
             </div>
 
             <select
-                class={$packets === undefined || $proxyState !== "uninitialized" ? "inactive" : ""}
+                class:inactive={$packets === undefined || $proxyState !== "uninitialized"}
                 id="version"
                 bind:value={$proxyVersion}
             >
@@ -176,7 +176,7 @@
 
             <button
                 type="button"
-                class={!$proxyAuthenticated || $proxyState !== "uninitialized" ? "inactive" : ""}
+                class:inactive={!$proxyAuthenticated || $proxyState !== "uninitialized"}
                 on:click={logout}>LOGOUT</button
             >
 
@@ -208,7 +208,7 @@
             />
             <div id="filter-settings">
                 <button
-                    class={$packets === undefined ? "inactive" : ""}
+                    class:inactive={$packets === undefined}
                     id="filter"
                     type="button"
                     on:click={toggleFiltersVisibility}>FILTERS</button
@@ -233,37 +233,20 @@
                         {#each $packets ?? [] as packet}
                             {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
                                 <li>
-                                    {#if $allowedPackets.includes(packet)}
-                                        <input
-                                            type="checkbox"
-                                            name={packet}
-                                            checked
-                                            on:change={(e) => updateAllowedPackets(e.target)}
-                                        />
-                                    {:else}
-                                        <input
-                                            type="checkbox"
-                                            name={packet}
-                                            on:change={(e) => updateAllowedPackets(e.target)}
-                                        />
-                                    {/if}
+                                    <input
+                                        type="checkbox"
+                                        name={packet}
+                                        checked={$allowedPackets.includes(packet)}
+                                        on:change={(e) => updateAllowedPackets(e.target)}
+                                    />
 
-                                    {#if $watchedPackets.includes(packet)}
-                                        <input
-                                            class="watch-checkbox"
-                                            type="checkbox"
-                                            checked
-                                            name={packet}
-                                            on:change={(e) => updateWatchedPackets(e.target)}
-                                        />
-                                    {:else}
-                                        <input
-                                            class="watch-checkbox"
-                                            type="checkbox"
-                                            name={packet}
-                                            on:click={(e) => updateWatchedPackets(e.target)}
-                                        />
-                                    {/if}
+                                    <input
+                                        class="watch-checkbox"
+                                        type="checkbox"
+                                        checked={$watchedPackets.includes(packet)}
+                                        name={packet}
+                                        on:change={(e) => updateWatchedPackets(e.target)}
+                                    />
 
                                     <span
                                         >{packet
@@ -287,13 +270,12 @@
             id="start"
             type="button"
             on:click={startProxy}
-            class={$proxyState !== "uninitialized" || $packets === undefined ? "inactive" : ""}
-            >START</button
+            class:inactive={$proxyState !== "uninitialized" || $packets === undefined}>START</button
         >
         <button
             id="stop"
             type="button"
-            class={$proxyState !== "running" ? "inactive" : ""}
+            class:inactive={$proxyState !== "running"}
             on:click={stopProxy}>STOP</button
         >
     </section>

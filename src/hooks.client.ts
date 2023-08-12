@@ -1,3 +1,3 @@
-import { init } from "$lib/events/api";
+import { init } from "$lib/api/events";
 
 init();
