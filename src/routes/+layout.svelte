@@ -1,6 +1,4 @@
 <script lang="ts">
-    import { onMount, setContext } from "svelte";
-
     import logo from "$lib/images/logo.png";
     import gears from "$lib/images/sidebar/gears.png";
     import terminal from "$lib/images/sidebar/terminal.png";
@@ -8,14 +6,7 @@
 
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
-    import EventsApi from "$lib/events/api";
-
     import "$lib/css/styles.css";
-
-    const eventsApi = new EventsApi();
-    setContext("eventsApi", eventsApi);
-
-    onMount(() => eventsApi.connect());
 </script>
 
 <SvelteToast />

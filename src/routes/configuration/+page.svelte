@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { getContext, onMount } from "svelte";
+    import { onMount } from "svelte";
 
     import {
         allowedPackets,
@@ -17,9 +17,8 @@
     } from "$lib/proxy/store";
 
     import { getPackets, getVersions } from "$lib/protocol/api";
-    import EventsApi from "$lib/events/api";
 
-    const eventsApi: EventsApi = getContext("eventsApi");
+    import * as eventsApi from "$lib/events/api";
 
     onMount(async () => {
         if ($versions.length === 0) $versions = await getVersions();

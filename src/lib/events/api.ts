@@ -14,137 +14,135 @@ import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts"
 
 import type { ClientEvent, ClientMessage, ClientPayload, ServerPayload } from "$lib/events/types";
 
-export default class EventsApi {
-    private eventSource: EventSource | undefined = undefined;
+let eventSource: EventSource;
 
-    public connect() {
-        return new Promise((resolve) => {
-            this.eventSource = new EventSource("/api/events");
+export function init() {
+    return new Promise((resolve) => {
+        eventSource = new EventSource("/api/events");
 
-            this.eventSource.onopen = resolve;
+        eventSource.onopen = resolve;
 
-            this.eventSource.addEventListener("proxy_state", (event) => {
-                const data = JSON.parse(event.data);
+        eventSource.addEventListener("proxy_state", (event) => {
+            const data = JSON.parse(event.data);
 
-                proxyState.set(data.state);
-                proxyAuthenticated.set(data.isAuthenticated);
-            });
+            proxyState.set(data.state);
+            proxyAuthenticated.set(data.isAuthenticated);
+        });
 
-            this.eventSource.addEventListener("proxy_start", () => {
-                allowedLogs.set([]);
-                watchedLogs.set([]);
+        eventSource.addEventListener("proxy_start", () => {
+            allowedLogs.set([]);
+            watchedLogs.set([]);
 
-                proxyState.set("running");
+            proxyState.set("running");
 
-                sendToastSuccess("The proxy has been started");
-            });
+            sendToastSuccess("The proxy has been started");
+        });
 
-            this.eventSource.addEventListener("proxy_stop", () => {
-                proxyState.set("uninitialized");
+        eventSource.addEventListener("proxy_stop", () => {
+            proxyState.set("uninitialized");
 
-                sendToastSuccess("The proxy has been closed");
-            });
+            sendToastSuccess("The proxy has been closed");
+        });
 
-            this.eventSource.addEventListener("proxy_packet", (event) => {
-                const packet: ServerPayload<"proxy_packet"> = JSON.parse(event.data);
+        eventSource.addEventListener("proxy_packet", (event) => {
+            const packet: ServerPayload<"proxy_packet"> = JSON.parse(event.data);
 
-                const $packetLimit = get(packetLimit);
-                const $allowedLogs = get(allowedLogs);
+            const $packetLimit = get(packetLimit);
+            const $allowedLogs = get(allowedLogs);
 
-                const diff = $allowedLogs.length - $packetLimit;
+            const diff = $allowedLogs.length - $packetLimit;
 
-                allowedLogs.update((packets) =>
-                    diff >= 0 ? [...packets.slice(diff + 1), packet] : [...packets, packet]
-                );
+            allowedLogs.update((packets) =>
+                diff >= 0 ? [...packets.slice(diff + 1), packet] : [...packets, packet]
+            );
 
-                const $watchedPackets = get(watchedPackets);
+            const $watchedPackets = get(watchedPackets);
 
-                const watchedIndex = $watchedPackets.indexOf(packet.name);
-                if (watchedIndex === -1) return;
+            const watchedIndex = $watchedPackets.indexOf(packet.name);
+            if (watchedIndex === -1) return;
 
-                const $watchedLogs = get(watchedLogs);
+            const $watchedLogs = get(watchedLogs);
 
-                if (typeof $watchedLogs[watchedIndex] === "undefined") {
-                    watchedLogs.update((logs) => {
-                        logs[watchedIndex] =
-                            packet.boundary === "serverbound"
-                                ? [undefined!, packet]
-                                : [packet, undefined!];
-                        return logs;
-                    });
-                } else {
-                    watchedLogs.update((logs) => {
-                        logs[watchedIndex]![packet.boundary === "serverbound" ? 1 : 0] = packet;
-                        return logs;
-                    });
+            if (typeof $watchedLogs[watchedIndex] === "undefined") {
+                watchedLogs.update((logs) => {
+                    logs[watchedIndex] =
+                        packet.boundary === "serverbound"
+                            ? [undefined!, packet]
+                            : [packet, undefined!];
+                    return logs;
+                });
+            } else {
+                watchedLogs.update((logs) => {
+                    logs[watchedIndex]![packet.boundary === "serverbound" ? 1 : 0] = packet;
+                    return logs;
+                });
+            }
+        });
+
+        eventSource.addEventListener("code_received", (event) => {
+            const codePayload: ServerPayload<"code_received"> = JSON.parse(event.data);
+
+            allowedLogs.update((packets) => [
+                ...packets,
+                {
+                    name: "msa_code",
+                    params: codePayload,
+                    boundary: "clientbound",
+                    timestamp: Date.now()
                 }
-            });
+            ]);
 
-            this.eventSource.addEventListener("code_received", (event) => {
-                const codePayload: ServerPayload<"code_received"> = JSON.parse(event.data);
-
-                allowedLogs.update((packets) => [
-                    ...packets,
-                    {
-                        name: "msa_code",
-                        params: codePayload,
-                        boundary: "clientbound",
-                        timestamp: Date.now()
-                    }
-                ]);
-
-                sendToastDefault("Received an MSA code. Please check the logger");
-            });
-
-            this.eventSource.addEventListener("server_error", (event) => {
-                console.error(JSON.parse(event.data));
-
-                proxyState.set("uninitialized");
-
-                sendToastError();
-            });
-
-            this.eventSource.addEventListener("protocol_downloaded", (event) => {
-                const data = JSON.parse(event.data);
-
-                packets.set(data.packets);
-
-                sendToastSuccess(`The ${data.version} packets have been downloaded`);
-            });
-
-            this.eventSource.addEventListener("error", console.error);
+            sendToastDefault("Received an MSA code. Please check the logger");
         });
-    }
 
-    private post<TEvent extends ClientEvent>(message: ClientMessage<TEvent>) {
-        return fetch("/api/events", {
-            method: "post",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(message)
+        eventSource.addEventListener("server_error", (event) => {
+            console.error(JSON.parse(event.data));
+
+            proxyState.set("uninitialized");
+
+            sendToastError();
         });
-    }
 
-    public start(payload: ClientPayload<"proxy_start">) {
-        return this.post<"proxy_start">({
-            event: "proxy_start",
-            payload
+        eventSource.addEventListener("protocol_downloaded", (event) => {
+            const data = JSON.parse(event.data);
+
+            packets.set(data.packets);
+
+            sendToastSuccess(`The ${data.version} packets have been downloaded`);
         });
-    }
 
-    public stop() {
-        return this.post<"proxy_stop">({ event: "proxy_stop" });
-    }
+        eventSource.addEventListener("error", console.error);
+    });
+}
 
-    public setAllowedPackets(payload: ClientPayload<"proxy_set_allowed_packets">) {
-        return this.post<"proxy_set_allowed_packets">({
-            event: "proxy_set_allowed_packets",
-            payload
-        });
-    }
+function post<TEvent extends ClientEvent>(message: ClientMessage<TEvent>) {
+    return fetch("/api/events", {
+        method: "post",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(message)
+    });
+}
 
-    public logout() {
-        return this.post<"proxy_logout">({ event: "proxy_logout" });
-    }
+export function start(payload: ClientPayload<"proxy_start">) {
+    return post<"proxy_start">({
+        event: "proxy_start",
+        payload
+    });
+}
+
+export function stop() {
+    return post<"proxy_stop">({ event: "proxy_stop" });
+}
+
+export function setAllowedPackets(payload: ClientPayload<"proxy_set_allowed_packets">) {
+    return post<"proxy_set_allowed_packets">({
+        event: "proxy_set_allowed_packets",
+        payload
+    });
+}
+
+export function logout() {
+    return post<"proxy_logout">({ event: "proxy_logout" });
 }
