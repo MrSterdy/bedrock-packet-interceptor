@@ -2,6 +2,7 @@
 node_modules
 /build
 /.svelte-kit
+*_packetReadError.txt
 /package
 .env
 .env.*
