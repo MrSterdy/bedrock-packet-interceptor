@@ -24,8 +24,14 @@ Install dependencies
 npm install
 ```
 
+Build the project
+
+```bash
+npm run build
+```
+
 And start the server
 
 ```bash
-npm run dev
+npm run preview
 ```
