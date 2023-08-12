@@ -5,6 +5,7 @@ node_modules
 /package
 .env
 .env.*
+*_packetReadError.txt
 !.env.example
 .vercel
 .output
