@@ -41,11 +41,10 @@
     }
 
     let filterInput = "";
+    let showFilters = false;
 
     function toggleFiltersVisibility() {
-        document.getElementById("packets").classList.toggle("hidden");
-        document.getElementById("filter-input").classList.toggle("hidden");
-        document.getElementById("toggle-filters").classList.toggle("hidden");
+        showFilters = !showFilters;
     }
 
     function toggleAllFilters() {
@@ -127,15 +126,14 @@
     <title>Configuration</title>
 </svelte:head>
 
-<form id="configuration">
-    <h1 class="title">Configuration</h1>
+<form class="flex flex-col gap-4 mx-auto max-w-3xl group">
+    <h1>Configuration</h1>
 
     <section class="settings">
         <h2>Proxy</h2>
 
-        <section id="transport-settings">
+        <section>
             <input
-                id="source-port"
                 placeholder="SOURCE PORT"
                 type="number"
                 min="0"
@@ -143,30 +141,29 @@
                 bind:value={$proxySourcePort}
                 class:inactive={$proxyState !== "uninitialized"}
             />
-            <div id="destination-settings">
+            <div class="flex gap-1">
                 <input
-                    id="dest-ip"
                     placeholder="DESTINATION IP"
                     type="text"
                     required
                     pattern="(^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$)|(^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$)"
                     bind:value={$proxyIp}
+                    class="w-1/2"
                     class:inactive={$proxyState !== "uninitialized"}
                 />
                 <input
-                    id="dest-port"
                     placeholder="DESTINATION PORT"
                     type="number"
                     min="0"
                     required
                     bind:value={$proxyPort}
+                    class="w-1/2"
                     class:inactive={$proxyState !== "uninitialized"}
                 />
             </div>
 
             <select
                 class:inactive={$packets === undefined || $proxyState !== "uninitialized"}
-                id="version"
                 bind:value={$proxyVersion}
             >
                 {#each $versions as version}
@@ -199,190 +196,116 @@
         <section>
             <input
                 type="number"
-                id="packet-limit"
                 placeholder="PACKET LIMIT"
                 min="0"
                 max="999"
                 bind:value={$packetLimit}
                 required
             />
-            <div id="filter-settings">
+            <div class="flex flex-col w-full" class:gap-3={showFilters}>
                 <button
                     class:inactive={$packets === undefined}
-                    id="filter"
+                    class="w-full"
                     type="button"
                     on:click={toggleFiltersVisibility}>FILTERS</button
                 >
 
-                {#if $packets !== undefined}
-                    <button
-                        id="toggle-filters"
-                        type="button"
-                        class="hidden"
-                        on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button
-                    >
+                <div class:hidden={!showFilters} class="flex flex-col gap-3" id="filter-menu">
+                    {#if $packets !== undefined}
+                        <button
+                            type="button"
+                            on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button
+                        >
 
-                    <input
-                        id="filter-input"
-                        placeholder="SEARCH..."
-                        bind:value={filterInput}
-                        class="hidden"
-                    />
+                        <input
+                            placeholder="SEARCH..."
+                            bind:value={filterInput}
+                        />
 
-                    <ul id="packets" class="options hidden">
-                        {#each $packets ?? [] as packet}
-                            {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
-                                <li>
-                                    <input
-                                        type="checkbox"
-                                        name={packet}
-                                        checked={$allowedPackets.includes(packet)}
-                                        on:change={(e) => updateAllowedPackets(e.target)}
-                                    />
+                        <ul id="packets" class="options">
+                            {#each $packets ?? [] as packet}
+                                {#if packet.split("_").join("").includes(filterInput.toLowerCase())}
+                                    <li>
+                                        <input
+                                            type="checkbox"
+                                            name={packet}
+                                            checked={$allowedPackets.includes(packet)}
+                                            on:change={(e) => updateAllowedPackets(e.target)}
+                                        />
 
-                                    <input
-                                        class="watch-checkbox"
-                                        type="checkbox"
-                                        checked={$watchedPackets.includes(packet)}
-                                        name={packet}
-                                        on:change={(e) => updateWatchedPackets(e.target)}
-                                    />
+                                        <input
+                                            type="checkbox"
+                                            checked={$watchedPackets.includes(packet)}
+                                            name={packet}
+                                            on:change={(e) => updateWatchedPackets(e.target)}
+                                        />
 
-                                    <span
+                                        <span
                                         >{packet
                                             .split("_")
                                             .map(
                                                 (word) => `${word[0].toUpperCase()}${word.slice(1)}`
                                             )
                                             .join("")}</span
-                                    >
-                                </li>
-                            {/if}
-                        {/each}
-                    </ul>
-                {/if}
+                                        >
+                                    </li>
+                                {/if}
+                            {/each}
+                        </ul>
+                    {/if}
+                </div>
             </div>
         </section>
     </section>
 
-    <section id="manage">
+    <section class="flex w-full gap-3">
         <button
-            id="start"
             type="button"
+            class="border-green-400 text-green-400 w-1/2 group-invalid:border-neutral-500 group-invalid:text-neutral-500 group-invalid:pointer-events-none"
             on:click={startProxy}
             class:inactive={$proxyState !== "uninitialized" || $packets === undefined}>START</button
         >
         <button
-            id="stop"
             type="button"
             class:inactive={$proxyState !== "running"}
+            class="border-red-500 text-red-500 w-1/2"
             on:click={stopProxy}>STOP</button
         >
     </section>
 </form>
 
-<style>
-    #configuration {
-        display: flex;
-        flex-direction: column;
-
-        gap: 1rem;
-        margin: 0 auto;
-
-        max-width: 50rem;
-    }
-
-    #destination-settings {
-        display: flex;
-
-        gap: 5px;
-    }
-
-    #filter-settings,
-    #manage {
-        display: flex;
-
-        width: 100%;
-
-        gap: 5px;
-    }
-
-    #filter-settings {
-        flex-direction: column;
-        gap: 10px;
-    }
-
-    #destination-settings input,
-    #manage button {
-        width: 50%;
-    }
-
-    form:invalid #start {
-        border-color: rgba(255, 255, 255, 0.4) !important;
-        color: rgba(255, 255, 255, 0.4) !important;
-
-        pointer-events: none;
+<style lang="postcss">
+    .settings {
+        @apply flex flex-col gap-1;
     }
 
     .settings > :nth-child(2) {
-        display: flex;
-        flex-direction: column;
-
-        width: 100%;
-
-        gap: 10px;
-
-        border-radius: 10px;
-        background-color: rgba(0, 0, 0, 0.2);
-        padding: 1rem;
-    }
-
-    #filter {
-        width: 100%;
+        @apply flex flex-col w-full gap-3 rounded-xl bg-neutral-800 p-4;
     }
 
     .options {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-        word-wrap: anywhere;
-        gap: 10px;
+        @apply grid grid-cols-[repeat(auto-fit,_minmax(15rem,_1fr))] break-all gap-3;
     }
 
     .options > li {
-        display: flex;
-        align-items: center;
-
-        gap: 5px;
+        @apply flex items-center gap-1;
     }
 
-    #start {
-        border-color: #66bb6a;
-        color: #66bb6a;
+    #packets input[type=checkbox]:nth-child(2) {
+        @apply border-none p-0;
     }
-
-    #stop {
-        border-color: #f44336;
-        color: #f44336;
-    }
-
-    .watch-checkbox {
-        border: none;
-        border-radius: unset;
-
-        padding: 0;
-    }
-    .watch-checkbox::before {
+    #packets input[type=checkbox]:nth-child(2)::before {
         all: unset;
 
         content: "";
 
-        background-image: url($lib/images/sidebar/eye.png);
+        background-image: url($lib/images/icons/eye.png);
         background-size: 100% 100%;
 
         width: 1.5rem;
         height: 1.5rem;
     }
-    .watch-checkbox:checked::before {
+    #packets input[type=checkbox]:nth-child(2):checked::before {
         background-image: url($lib/images/icons/eye-crossed.png);
     }
 </style>

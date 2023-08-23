@@ -11,8 +11,8 @@
     }
 </script>
 
-<section id="watcher">
-    <h1 class="title">Watcher</h1>
+<section class="flex flex-col h-full gap-4">
+    <h1>Watcher</h1>
 
     <ul class="terminal">
         {#each $watchedLogs as packetPair, pairI}
@@ -63,12 +63,3 @@
         {/each}
     </ul>
 </section>
-
-<style>
-    #watcher {
-        display: flex;
-        flex-direction: column;
-
-        height: 100%;
-    }
-</style>

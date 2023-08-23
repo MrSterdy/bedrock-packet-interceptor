@@ -1,8 +1,5 @@
 <script lang="ts">
     import logo from "$lib/images/logo.png";
-    import gears from "$lib/images/sidebar/gears.png";
-    import terminal from "$lib/images/sidebar/terminal.png";
-    import eye from "$lib/images/sidebar/eye.png";
 
     import { SvelteToast } from "@zerodevx/svelte-toast";
 
@@ -11,112 +8,51 @@
 
 <SvelteToast />
 
-<section class="app">
-    <section class="sidebar">
-        <div class="sidebar-header">
-            <a class="sidebar-url" href="/">Home</a>
-            <img class="sidebar-logo" src={logo} alt="" />
+<section class="flex flex-col h-full">
+    <nav class="flex justify-between gap-4 h-20 px-4 bg-neutral-800 lg:px-24">
+        <div class="logo">
+            <a class="logo-url" href="https://github.com/MrSterdy/bedrock-packet-interceptor">Github</a>
+            <img src={logo} alt="" />
         </div>
-
-        <ul class="sidebar-items">
-            <li class="sidebar-item">
-                <a class="sidebar-url" href="/configuration">Configuration</a>
-                <img class="sidebar-icon" src={gears} alt="" />
-                <span class="sidebar-text">Configuration</span>
+        <ul class="flex gap-4 md:gap-12">
+            <li class="navbar-item">
+                <a class="navbar-url" href="/logger">Logger</a>
             </li>
-            <li class="sidebar-item">
-                <a class="sidebar-url" href="/logger">Logger</a>
-                <img class="sidebar-icon" src={terminal} alt="" />
-                <span class="sidebar-text">Logger</span>
+            <li class="navbar-item">
+                <a class="navbar-url" href="/configuration">Configuration</a>
             </li>
-            <li class="sidebar-item">
-                <a class="sidebar-url" href="/watcher">Watcher</a>
-                <img class="sidebar-icon" src={eye} alt="" />
-                <span class="sidebar-text">Watcher</span>
+            <li class="navbar-item">
+                <a class="navbar-url" href="/watcher">Watcher</a>
             </li>
         </ul>
-    </section>
+    </nav>
 
-    <main>
+    <main class="grow overflow-y-auto box-border p-8">
         <slot />
     </main>
 </section>
 
-<style>
-    .app {
-        display: flex;
-
-        height: 100%;
+<style lang="postcss">
+    .navbar-item {
+        @apply flex items-center gap-3 p-2;
     }
 
-    .sidebar {
-        padding-top: 1rem;
-        gap: 1.5rem;
-
-        background-color: #212121;
-
-        display: flex;
-        flex-direction: column;
-
-        font-size: 1.2rem;
+    .navbar-url {
+        @apply transition duration-300 text-sm sm:text-lg;
+    }
+    .navbar-url:hover {
+        @apply text-neutral-400;
     }
 
-    .sidebar-header {
-        position: relative;
-
-        display: flex;
-        justify-content: center;
+    .logo {
+        @apply relative h-full p-2 shrink-0;
     }
 
-    .sidebar-logo {
-        width: 10rem;
-        height: 10rem;
+    .logo img {
+        @apply h-full;
     }
 
-    .sidebar-items {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .sidebar-item {
-        position: relative;
-
-        display: flex;
-        align-items: center;
-
-        gap: 10px;
-
-        padding: 1rem;
-
-        transition: 300ms;
-    }
-    .sidebar-item:hover {
-        background-color: rgba(0, 0, 0, 0.2);
-    }
-
-    .sidebar-url {
-        position: absolute;
-
-        left: 0;
-
-        width: 100%;
-        height: 100%;
-
-        opacity: 0;
-    }
-
-    .sidebar-icon {
-        width: 1.5rem;
-        height: 1.5rem;
-    }
-
-    main {
-        flex-grow: 1;
-
-        overflow-y: auto;
-
-        box-sizing: border-box;
-
-        padding: 1rem;
+    .logo-url {
+        @apply absolute left-0 top-0 w-full h-full opacity-0 z-10;
     }
 </style>

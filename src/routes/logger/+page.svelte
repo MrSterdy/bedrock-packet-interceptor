@@ -24,12 +24,11 @@
     <title>Logger</title>
 </svelte:head>
 
-<section id="logger">
-    <h1 class="title">Logger</h1>
+<section class="flex flex-col h-full gap-4">
+    <h1>Logger</h1>
 
     <button
         type="button"
-        class="clear"
         class:inactive={$allowedLogs.length === 0}
         on:click={clearPackets}>CLEAR</button
     >
@@ -76,14 +75,3 @@
         {/each}
     </ul>
 </section>
-
-<style>
-    #logger {
-        display: flex;
-        flex-direction: column;
-
-        height: 100%;
-
-        gap: 1rem;
-    }
-</style>

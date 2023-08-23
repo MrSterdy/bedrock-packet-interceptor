@@ -1,165 +1,85 @@
 @import url("https://fonts.googleapis.com/css2?family=Quicksand&family=Raleway&family=VT323&display=swap");
 
-* {
-    box-sizing: border-box;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+    button,
+    input,
+    select {
+        @apply border-2 rounded p-1 bg-transparent outline-none text-white font-raleway text-base transition duration-300;
+    }
+
+    select,
+    button {
+        @apply cursor-pointer;
+    }
+
+    .hidden {
+        display: none !important;
+    }
+
+    option {
+        @apply bg-neutral-900;
+    }
+
+    input::placeholder {
+        @apply text-center text-neutral-100 font-raleway text-base;
+    }
+
+    input[type="checkbox"] {
+        @apply appearance-none border-2 border-solid border-white transform -translate-y-[0.075em] grid cursor-pointer;
+    }
+    input[type="checkbox"]::before {
+        @apply content-[""] w-3 h-3 transform scale-0 rounded shadow-[inset_1em_1em_white];
+    }
+    input[type="checkbox"]:checked::before {
+        @apply scale-100;
+    }
+
+    button.inactive,
+    input.inactive,
+    select.inactive {
+        @apply !border-neutral-500 !text-neutral-500 pointer-events-none;
+    }
+
+    h1 {
+        @apply text-center font-quicksand text-3xl;
+    }
+    h2 {
+        @apply text-2xl;
+    }
+
+    .terminal {
+        @apply grow p-4 rounded-xl bg-neutral-800 break-all font-vt323;
+    }
+
+    .packet {
+        @apply text-2xl;
+    }
+
+    .packet-prefix {
+        @apply text-neutral-500;
+    }
+
+    .packet-title {
+        @apply flex justify-between;
+    }
+
+    .remove-packet {
+        @apply border-none p-0 text-xl font-vt323 text-neutral-500;
+    }
+
+    .json .root, .json .container {
+        @apply !cursor-pointer;
+    }
 }
 
-html,
-body {
-    padding: 0;
-    margin: 0;
+:root {
+    --toastContainerTop: 6.5rem;
 
-    height: 100%;
-}
-
-body {
-    background-color: #2d2d2d;
-
-    font-family: Raleway, sans-serif;
-    color: #ffffff;
-}
-
-ul {
-    margin: 0;
-    padding: 0;
-
-    list-style-type: none;
-}
-
-button,
-input,
-select {
-    border: 2px solid #ffffff;
-    border-radius: 5px;
-
-    padding: 5px;
-
-    background: none;
-    outline: none;
-
-    color: inherit;
-    font-family: inherit;
-    font-size: inherit;
-
-    transition: 300ms;
-}
-
-select {
-    cursor: pointer;
-}
-
-option {
-    background-color: #212121;
-}
-
-input::placeholder {
-    text-align: center;
-    color: rgba(255, 255, 255, 0.7);
-
-    font-family: inherit;
-    font-size: inherit;
-}
-
-input[type="checkbox"] {
-    appearance: none;
-
-    margin: 0;
-
-    border: 0.15em solid #ffffff;
-    border-radius: 0.15em;
-    transform: translateY(-0.075em);
-
-    display: grid;
-
-    cursor: pointer;
-}
-input[type="checkbox"]::before {
-    content: "";
-
-    width: 0.65em;
-    height: 0.65em;
-
-    transform: scale(0);
-
-    border-radius: 2px;
-    box-shadow: inset 1em 1em #ffffff;
-}
-input[type="checkbox"]:checked::before {
-    transform: scale(1);
-}
-
-button {
-    cursor: pointer;
-}
-
-button.inactive,
-input.inactive,
-select.inactive {
-    border-color: rgba(255, 255, 255, 0.4) !important;
-    color: rgba(255, 255, 255, 0.4) !important;
-
-    pointer-events: none;
-}
-
-.hidden {
-    display: none !important;
-}
-
-h1.title {
-    text-align: center;
-    font-size: 2rem;
-    font-family: Quicksand, sans-serif;
-}
-
-.terminal {
-    flex-grow: 1;
-
-    padding: 1rem;
-    border-radius: 10px;
-
-    background-color: rgba(0, 0, 0, 0.2);
-
-    overflow-y: auto;
-
-    word-wrap: anywhere;
-    font-family: VT323, sans-serif;
-}
-
-.packet {
-    font-size: 1.5rem;
-}
-
-.packet-prefix {
-    color: rgba(255, 255, 255, 0.3);
-}
-
-.packet-title {
-    display: flex;
-    justify-content: space-between;
-}
-
-.remove-packet {
-    border: none;
-    padding: 0;
-
-    font-size: 1.2rem;
-    color: rgba(255, 255, 255, 0.3);
-}
-
-.json {
     --json-tree-font-size: 1.2rem;
     --json-tree-font-family: VT323;
     --json-tree-property-color: rgba(255, 255, 255, 0.5);
-}
-
-.json > ul {
-    cursor: initial !important;
-}
-
-.json .root {
-    cursor: pointer !important;
-}
-
-.json .container {
-    cursor: pointer !important;
 }
