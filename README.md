@@ -2,7 +2,7 @@
 
 MITM proxy tool with web interface for Minecraft: Bedrock Edition
 
-![](https://user-images.githubusercontent.com/83646375/253721984-fe6919e1-f0e7-415b-87e1-a508472debc9.png)
+![](https://user-images.githubusercontent.com/83646375/262743103-b4dae471-5de2-48f3-922a-8dc1631bfd4e.png)
 
 ## Run Locally
 
