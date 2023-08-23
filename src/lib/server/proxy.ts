@@ -27,6 +27,7 @@ export async function start(
                 port: port,
                 offline
             },
+            omitParseErrors: true,
             onMsaCode: (data) => {
                 const codePayload: ServerPayload<"code_received"> = {
                     code: data.user_code,
