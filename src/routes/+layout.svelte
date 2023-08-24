@@ -16,10 +16,10 @@
         </div>
         <ul class="flex gap-4 md:gap-12">
             <li class="navbar-item">
-                <a class="navbar-url" href="/logger">Logger</a>
+                <a class="navbar-url" href="/configuration">Configuration</a>
             </li>
             <li class="navbar-item">
-                <a class="navbar-url" href="/configuration">Configuration</a>
+                <a class="navbar-url" href="/logger">Logger</a>
             </li>
             <li class="navbar-item">
                 <a class="navbar-url" href="/watcher">Watcher</a>
