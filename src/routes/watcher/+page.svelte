@@ -2,6 +2,7 @@
     import JSONTree from "svelte-json-tree";
 
     import { watchedLogs, watchedPackets } from "$lib/store";
+    import { formatPacketName } from "$lib/utils/format.js";
 
     function unwatchPacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
@@ -28,12 +29,7 @@
                                             .split(" ")[0]}] [{boundary.toUpperCase()}] >
                                         </span>
 
-                                        {packet.name
-                                            .split("_")
-                                            .map(
-                                                (word) => `${word[0].toUpperCase()}${word.slice(1)}`
-                                            )
-                                            .join("")}
+                                        {formatPacketName(packet.name)}
                                     </span>
 
                                 {#if pairI === 0}

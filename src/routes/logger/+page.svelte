@@ -2,6 +2,7 @@
     import JSONTree from "svelte-json-tree";
 
     import { allowedLogs, watchedPackets } from "$lib/store";
+    import { formatPacketName } from "$lib/utils/format";
 
     function removePacket(event) {
         const packetIndex = +event.target.getAttribute("data-packet-index");
@@ -43,10 +44,7 @@
                             >
                         </span>
 
-                        {packet.name
-                            .split("_")
-                            .map((word) => `${word[0].toUpperCase()}${word.slice(1)}`)
-                            .join("")}
+                        {formatPacketName(packet.name)}
 
                         {#if !$watchedPackets.includes(packet.name)}
                             <button

@@ -19,6 +19,7 @@
     import { getPackets, getVersions } from "$lib/api/protocol";
 
     import * as eventsApi from "$lib/api/events";
+    import { formatPacketName } from "$lib/utils/format.js";
 
     onMount(async () => {
         if ($versions.length === 0) $versions = await getVersions();
@@ -240,14 +241,7 @@
                                             on:change={(e) => updateWatchedPackets(e.target)}
                                         />
 
-                                        <span
-                                        >{packet
-                                            .split("_")
-                                            .map(
-                                                (word) => `${word[0].toUpperCase()}${word.slice(1)}`
-                                            )
-                                            .join("")}</span
-                                        >
+                                        <span>{formatPacketName(packet)}</span>
                                     </li>
                                 {/if}
                             {/each}
