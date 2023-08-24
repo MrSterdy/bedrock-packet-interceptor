@@ -7,7 +7,6 @@ import type { ClientMessage } from "$lib/types";
 
 export function GET() {
     let listener: (event: { eventName: string; args?: object }) => void;
-    let pingInterval: NodeJS.Timer;
 
     const stream = new ReadableStream({
         start(controller) {
@@ -29,16 +28,9 @@ export function GET() {
                 );
 
             Emitter.on("all", listener);
-
-            pingInterval = setInterval(
-                () => controller.enqueue(`event: server_ping\ndata:\n\n`),
-                3000
-            );
         },
         cancel() {
             Emitter.off("all", listener);
-
-            clearInterval(pingInterval);
         }
     });
 
