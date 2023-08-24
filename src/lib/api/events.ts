@@ -63,17 +63,14 @@ export function init() {
 
             const $watchedLogs = get(watchedLogs);
 
-            if (typeof $watchedLogs[watchedIndex] === "undefined") {
+            if ($watchedLogs[watchedIndex] === undefined) {
                 watchedLogs.update((logs) => {
-                    logs[watchedIndex] =
-                        packet.boundary === "serverbound"
-                            ? [undefined!, packet]
-                            : [packet, undefined!];
+                    logs[watchedIndex] = { [packet.boundary]: packet };
                     return logs;
                 });
             } else {
                 watchedLogs.update((logs) => {
-                    logs[watchedIndex]![packet.boundary === "serverbound" ? 1 : 0] = packet;
+                    logs[watchedIndex]![packet.boundary] = packet;
                     return logs;
                 });
             }

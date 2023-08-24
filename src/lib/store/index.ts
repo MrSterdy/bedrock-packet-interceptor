@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 
 import { browser } from "$app/environment";
 
-import type { Proxy, ServerPayload } from "$lib/types";
+import type { PacketBoundary, Proxy, ServerPayload } from "$lib/types";
 
 export function storable<T>(data: T, name: string) {
     const store = writable(data);
@@ -28,7 +28,9 @@ export const proxyState = storable<Proxy["state"]>("uninitialized", "proxy_state
 export const proxyOffline = storable<Proxy["offline"]>(false, "proxy_offline");
 
 export const watchedPackets = storable<string[]>([], "watched_packets");
-export const watchedLogs = writable<ServerPayload<"proxy_packet">[][]>([]);
+export const watchedLogs = writable<
+    { [boundary in PacketBoundary]?: ServerPayload<"proxy_packet"> }[]
+>([]);
 
 export const allowedPackets = storable<string[]>([], "allowed_packets");
 export const allowedLogs = writable<ServerPayload<"proxy_packet">[]>([]);

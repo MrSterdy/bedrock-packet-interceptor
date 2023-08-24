@@ -13,6 +13,8 @@ export type Packet = {
     params: object;
 };
 
+export type PacketBoundary = "serverbound" | "clientbound";
+
 export type ServerSignalEvent = "proxy_start" | "proxy_stop";
 export type ServerPayloadEvent =
     | "server_error"
@@ -31,7 +33,7 @@ export type ServerPayload<TEvent extends ServerPayloadEvent> = TEvent extends "c
     : TEvent extends "protocol_downloaded"
     ? { version: string; packets: string[] }
     : TEvent extends "proxy_packet"
-    ? Packet & { boundary: "serverbound" | "clientbound"; timestamp: number }
+    ? Packet & { boundary: PacketBoundary; timestamp: number }
     : never;
 
 export type ClientSignalEvent = "proxy_stop" | "proxy_logout";
