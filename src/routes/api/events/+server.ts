@@ -6,26 +6,24 @@ import Emitter from "$lib/server/emitter";
 import type { ClientMessage } from "$lib/types";
 
 export function GET() {
-    let listener: (event: { eventName: string; args?: object }) => void;
+    let listener: (event: { event: string; payload?: object }) => void;
 
     const stream = new ReadableStream({
         start(controller) {
-            const proxyData = {
-                state: proxy.isRunning() ? "running" : "uninitialized",
-                isAuthenticated: proxy.isAuthenticated()
-            };
-            controller.enqueue(`event: proxy_state\ndata: ${JSON.stringify(proxyData)}\n\n`);
-
-            listener = (event) =>
+            const sendEvent = (eventName: string, args?: object) => {
                 controller.enqueue(
-                    `event: ${event.eventName}\ndata:${
-                        event.args
-                            ? ` ${JSON.stringify(event.args, (_, value) =>
+                    `event: ${eventName}\ndata:${
+                        args
+                            ? ` ${JSON.stringify(args, (_, value) =>
                                   typeof value === "bigint" ? value.toString() : value
                               )}`
                             : ""
                     }\n\n`
                 );
+            };
+
+            sendEvent("proxy_state_update", proxy.getState());
+            listener = (event) => sendEvent(event.event, event.payload);
 
             Emitter.on("all", listener);
         },
@@ -49,22 +47,19 @@ export async function POST(reqEvent: RequestEvent) {
 
     switch (message.event) {
         case "proxy_start":
-            await proxy.start(
-                message.payload.sourcePort,
-                message.payload.ip,
-                message.payload.port,
-                message.payload.version,
-                message.payload.offline
-            );
+            await proxy.start();
             break;
         case "proxy_stop":
-            proxy.stop();
+            await proxy.stop();
             break;
         case "proxy_set_allowed_packets":
             proxy.setAllowedPackets(message.payload);
             break;
         case "proxy_logout":
             proxy.logout();
+            break;
+        case "proxy_settings_update":
+            proxy.setSettings(message.payload);
     }
 
     return json({ success: true });

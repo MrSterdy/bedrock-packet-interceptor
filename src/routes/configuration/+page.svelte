@@ -20,6 +20,7 @@
 
     import * as eventsApi from "$lib/api/events";
     import { formatPacketName } from "$lib/utils/format.js";
+    import { setSettings } from "$lib/api/events";
 
     onMount(async () => {
         if ($versions.length === 0) $versions = await getVersions();
@@ -97,28 +98,25 @@
     }
 
     async function startProxy() {
-        $proxyState = "starting";
+        await Promise.all([
+            setAllowedPackets(),
+            setSettings({
+                sourcePort: $proxySourcePort,
+                ip: $proxyIp,
+                port: $proxyPort,
+                version: $proxyVersion,
+                offline: $proxyOffline
+            })
+        ]);
 
-        await setAllowedPackets();
-
-        await eventsApi.start({
-            sourcePort: $proxySourcePort,
-            ip: $proxyIp,
-            port: $proxyPort,
-            version: $proxyVersion,
-            offline: $proxyOffline
-        });
+        await eventsApi.start();
     }
 
     function stopProxy() {
-        $proxyState = "closing";
-
         return eventsApi.stop();
     }
 
     function logout() {
-        $proxyAuthenticated = false;
-
         return eventsApi.logout();
     }
 </script>
@@ -213,15 +211,10 @@
 
                 <div class:hidden={!showFilters} class="flex flex-col gap-3" id="filter-menu">
                     {#if $packets !== undefined}
-                        <button
-                            type="button"
-                            on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button
+                        <button type="button" on:click={toggleAllFilters}>TOGGLE ALL FILTERS</button
                         >
 
-                        <input
-                            placeholder="SEARCH..."
-                            bind:value={filterInput}
-                        />
+                        <input placeholder="SEARCH..." bind:value={filterInput} />
 
                         <ul id="packets" class="options">
                             {#each $packets ?? [] as packet}
@@ -285,10 +278,10 @@
         @apply flex items-center gap-1;
     }
 
-    #packets input[type=checkbox]:nth-child(2) {
+    #packets input[type="checkbox"]:nth-child(2) {
         @apply border-none p-0;
     }
-    #packets input[type=checkbox]:nth-child(2)::before {
+    #packets input[type="checkbox"]:nth-child(2)::before {
         all: unset;
 
         content: "";
@@ -299,7 +292,7 @@
         width: 1.5rem;
         height: 1.5rem;
     }
-    #packets input[type=checkbox]:nth-child(2):checked::before {
+    #packets input[type="checkbox"]:nth-child(2):checked::before {
         background-image: url($lib/images/icons/eye-crossed.png);
     }
 </style>

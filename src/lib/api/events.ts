@@ -12,7 +12,14 @@ import {
 
 import { sendToastDefault, sendToastError, sendToastSuccess } from "$lib/toasts";
 
-import type { ClientEvent, ClientMessage, ClientPayload, ServerPayload } from "$lib/types";
+import type {
+    ClientEvent,
+    ClientMessage,
+    ClientPayload,
+    ProxySettings,
+    ProxyState,
+    ServerPayload
+} from "$lib/types";
 
 let eventSource: EventSource;
 
@@ -22,26 +29,16 @@ export function init() {
 
         eventSource.onopen = resolve;
 
-        eventSource.addEventListener("proxy_state", (event) => {
-            const data = JSON.parse(event.data);
+        eventSource.addEventListener("proxy_state_update", (event) => {
+            const data: ProxyState = JSON.parse(event.data);
+
+            if (data.state === "starting") {
+                allowedLogs.set([]);
+                watchedLogs.set([]);
+            }
 
             proxyState.set(data.state);
             proxyAuthenticated.set(data.isAuthenticated);
-        });
-
-        eventSource.addEventListener("proxy_start", () => {
-            allowedLogs.set([]);
-            watchedLogs.set([]);
-
-            proxyState.set("running");
-
-            sendToastSuccess("The proxy has been started");
-        });
-
-        eventSource.addEventListener("proxy_stop", () => {
-            proxyState.set("uninitialized");
-
-            sendToastSuccess("The proxy has been closed");
         });
 
         eventSource.addEventListener("proxy_packet", (event) => {
@@ -95,8 +92,6 @@ export function init() {
         eventSource.addEventListener("server_error", (event) => {
             console.error(JSON.parse(event.data));
 
-            proxyState.set("uninitialized");
-
             sendToastError();
         });
 
@@ -108,7 +103,11 @@ export function init() {
             sendToastSuccess(`The ${data.version} packets have been downloaded`);
         });
 
-        eventSource.addEventListener("error", console.error);
+        eventSource.addEventListener("error", (err) => {
+            console.error(err);
+
+            sendToastError();
+        });
     });
 }
 
@@ -122,11 +121,8 @@ function post<TEvent extends ClientEvent>(message: ClientMessage<TEvent>) {
     });
 }
 
-export function start(payload: ClientPayload<"proxy_start">) {
-    return post<"proxy_start">({
-        event: "proxy_start",
-        payload
-    });
+export function start() {
+    return post<"proxy_start">({ event: "proxy_start" });
 }
 
 export function stop() {
@@ -136,6 +132,13 @@ export function stop() {
 export function setAllowedPackets(payload: ClientPayload<"proxy_set_allowed_packets">) {
     return post<"proxy_set_allowed_packets">({
         event: "proxy_set_allowed_packets",
+        payload
+    });
+}
+
+export function setSettings(payload: ProxySettings) {
+    return post<"proxy_settings_update">({
+        event: "proxy_settings_update",
         payload
     });
 }

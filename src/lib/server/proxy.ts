@@ -2,30 +2,37 @@ import fs from "fs";
 import { Relay } from "bedrock-protocol";
 import type { Version } from "bedrock-protocol";
 
-import type { ServerPayload } from "$lib/types";
+import type { ProxySettings, ProxyState, ServerPayload } from "$lib/types";
 import Emitter from "$lib/server/emitter";
 
-let relay: Relay | undefined = undefined;
+let relay: Relay | undefined;
 
+let proxySettings: ProxySettings | undefined;
+const proxyState: ProxyState = {
+    state: "uninitialized",
+    isAuthenticated: fs.existsSync("profiles")
+};
 let allowedPackets: string[] = [];
 
-export async function start(
-    sourcePort: number,
-    ip: string,
-    port: number,
-    version: string,
-    offline: boolean
-) {
-    if (relay !== undefined) return;
+const sleep = () => new Promise((r) => setTimeout(r, 60));
+
+export async function start() {
+    if (proxySettings === undefined || relay !== undefined) return;
 
     try {
+        proxyState.state = "starting";
+        Emitter.emit("proxy_state_update", proxyState);
+
+        // ???
+        await sleep();
+
         relay = new Relay({
             host: "0.0.0.0",
-            port: sourcePort,
+            port: proxySettings.sourcePort,
             destination: {
-                host: ip,
-                port: port,
-                offline
+                host: proxySettings.ip,
+                port: proxySettings.port,
+                offline: proxySettings.offline
             },
             omitParseErrors: true,
             onMsaCode: (data) => {
@@ -35,18 +42,23 @@ export async function start(
                 };
 
                 Emitter.emit("code_received", codePayload);
+
+                proxyState.isAuthenticated = true;
+                Emitter.emit("proxy_state_update", proxyState);
             },
-            version: version as Version,
+            version: proxySettings.version as Version,
             // @ts-ignore
             profilesFolder: "profiles"
         });
 
         await relay.listen();
     } catch (e: any) {
-        return stop(e);
+        await stop(e);
+        return;
     }
 
-    Emitter.emit("proxy_start");
+    proxyState.state = "running";
+    Emitter.emit("proxy_state_update", proxyState);
 
     relay.on("connect", (player) => {
         // @ts-ignore
@@ -80,15 +92,19 @@ export async function start(
     relay.on("error", (error: Error) => stop(error));
 }
 
-export function stop(error?: Error) {
-    // @ts-ignore
-    relay?.raknet.close();
+export async function stop(error?: Error) {
+    proxyState.state = "closing";
+    Emitter.emit("proxy_state_update", proxyState);
+
+    relay?.close();
+    await sleep();
     relay = undefined;
 
-    if (error !== undefined) {
+    proxyState.state = "uninitialized";
+    Emitter.emit("proxy_state_update", proxyState);
+
+    if (error) {
         Emitter.emit("server_error", { stack: error.stack, message: error.message });
-    } else {
-        Emitter.emit("proxy_stop");
     }
 }
 
@@ -96,14 +112,17 @@ export function setAllowedPackets(packets: string[]) {
     allowedPackets = packets;
 }
 
-export function isRunning() {
-    return relay !== undefined;
-}
-
-export function isAuthenticated() {
-    return fs.existsSync("profiles");
+export function setSettings(settings: ProxySettings) {
+    proxySettings = settings;
 }
 
 export function logout() {
     fs.rmSync("profiles", { recursive: true, force: true });
+
+    proxyState.isAuthenticated = false;
+    Emitter.emit("proxy_state_update", proxyState);
+}
+
+export function getState() {
+    return proxyState;
 }
