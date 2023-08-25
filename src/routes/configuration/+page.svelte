@@ -140,7 +140,7 @@
                 bind:value={$proxySourcePort}
                 class:inactive={$proxyState !== "uninitialized"}
             />
-            <div class="flex gap-1">
+            <div class="flex gap-3">
                 <input
                     placeholder="DESTINATION IP"
                     type="text"

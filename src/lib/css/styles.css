@@ -16,6 +16,11 @@
         @apply cursor-pointer;
     }
 
+    input:not([type="checkbox"]),
+    select {
+        @apply rounded-none border-t-0 border-l-0 border-r-0;
+    }
+
     .hidden {
         display: none !important;
     }
@@ -71,7 +76,8 @@
         @apply border-none p-0 text-xl font-vt323 text-neutral-500;
     }
 
-    .json .root, .json .container {
+    .json .root,
+    .json .container {
         @apply !cursor-pointer;
     }
 }
