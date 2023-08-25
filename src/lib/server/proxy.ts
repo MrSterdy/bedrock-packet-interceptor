@@ -35,6 +35,7 @@ export async function start() {
                 offline: proxySettings.offline
             },
             omitParseErrors: true,
+            forceSingle: true,
             onMsaCode: (data) => {
                 const codePayload: ServerPayload<"code_received"> = {
                     code: data.user_code,
